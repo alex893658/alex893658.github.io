@@ -311,14 +311,16 @@
     } catch(e){ msg.style.color='var(--flame)'; msg.textContent='Could not connect. Please try again.'; }
   });
 
-  document.getElementById('termSelect').addEventListener('change', async (e)=>{
+  document.getElementById('termSelect').addEventListener('change', (e)=>{
     const area = document.getElementById('resultsArea');
-    area.className='loading'; area.textContent='Loading...';
-    const data = await apiCall({action:'getResults', admissionNo: currentStudent.admissionNo, term: e.target.value});
-    if(!data.success){ area.className='empty'; area.textContent = data.message; return; }
-    let html = '<table><tr><th>Subject</th><th>CA1</th><th>CA2</th><th>Exam</th><th>Total</th><th>Grade</th><th>Remark</th></tr>';
-    data.results.forEach(r=>{
-      html += `<tr><td>${r.subject}</td><td>${r.ca1}</td><td>${r.ca2}</td><td>${r.exam}</td><td>${r.total}</td><td>${r.grade}</td><td>${r.remark}</td></tr>`;
+    if(!currentStudent || !currentStudent.terms){ area.className='empty'; area.textContent='No results found.'; return; }
+    const terms = currentStudent.terms.filter(t => !e.target.value || t.term === e.target.value);
+    if(terms.length===0){ area.className='empty'; area.textContent='No results for this term.'; return; }
+    let html = '<table><tr><th>Subject</th><th>Score</th><th>Grade</th></tr>';
+    terms.forEach(t=>{
+      t.subjects.forEach(s=>{
+        html += `<tr><td>${s.subject}</td><td>${s.score}</td><td>${s.grade}</td></tr>`;
+      });
     });
     html += '</table>';
     area.className=''; area.innerHTML = html;
