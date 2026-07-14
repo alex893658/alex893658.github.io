@@ -274,13 +274,13 @@
     if(!admissionNo || !password){ msg.style.color='var(--flame)'; msg.textContent='Please fill in both fields.'; return; }
     msg.style.color='#5A5D68'; msg.textContent='Checking...';
     try{
-      const data = await apiCall({action:'studentLogin', admissionNo, password});
+      const data = await apiCall({action:'studentLogin', id: admissionNo, pin: password});
       if(data.success){
         currentStudent = data;
         document.getElementById('loginView').style.display='none';
         document.getElementById('studentDash').classList.add('active');
-        document.getElementById('studentWelcome').textContent = 'Welcome, ' + data.fullName;
-        document.getElementById('studentClassLine').textContent = data.className;
+        document.getElementById('studentWelcome').textContent = 'Welcome, ' + data.name;
+        document.getElementById('studentClassLine').textContent = data.studentClass;
         loadStudentNotes();
       } else {
         msg.style.color='var(--flame)'; msg.textContent = data.message;
@@ -295,12 +295,12 @@
     if(!staffId || !password){ msg.style.color='var(--flame)'; msg.textContent='Please fill in both fields.'; return; }
     msg.style.color='#5A5D68'; msg.textContent='Checking...';
     try{
-      const data = await apiCall({action:'teacherLogin', staffId, password});
+      const data = await apiCall({action:'staffLogin', id: staffId, pin: password});
       if(data.success){
         currentTeacher = data;
         document.getElementById('loginView').style.display='none';
         document.getElementById('teacherDash').classList.add('active');
-        document.getElementById('teacherWelcome').textContent = 'Welcome, ' + data.fullName;
+        document.getElementById('teacherWelcome').textContent = 'Welcome, ' + data.name;
         document.getElementById('teacherClassLine').textContent = 'Assigned class: ' + (data.assignedClass || '—');
         document.getElementById('noteClass').value = data.assignedClass || '';
         document.getElementById('viewClassInput').value = data.assignedClass || '';
