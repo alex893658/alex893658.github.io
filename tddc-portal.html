@@ -400,7 +400,7 @@ document.getElementById('loadClassListBtn').addEventListener('click', async ()=>
   const className = document.getElementById('listClassInput').value.trim();
   if(!className) return;
   area.className='loading'; area.textContent='Loading...';
-  const data = await apiCall({action:'getClassList', className});
+  const data = await apiCall({action:'getClassSheet', className});
   if(!data.success || !data.students || data.students.length===0){
     area.className='empty'; area.textContent='No students found for this class.'; return;
   }
