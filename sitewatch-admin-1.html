@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiteWatch — Admin Upload</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F2EA; --blueprint:#1F3A5F; --blueprint-deep:#122438;
+  --concrete:#8C8577; --amber:#D9862B; --verified:#3F7A55; --verified-deep:#2C5A3E;
+  --charcoal:#221F1B; --line:rgba(31,58,95,0.16); --line-soft:rgba(31,58,95,0.08);
+  --error:#B3452E;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Inter',sans-serif;background:var(--paper);color:var(--charcoal);line-height:1.5;
+  background-image:linear-gradient(var(--line-soft) 1px, transparent 1px),linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+  background-size:28px 28px;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+
+/* Login gate */
+#loginView{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.login-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:34px 30px;max-width:360px;width:100%;box-shadow:0 10px 30px rgba(18,36,56,0.08);}
+.login-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--amber);margin-bottom:8px;}
+.login-card h1{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;color:var(--blueprint);margin-bottom:22px;}
+
+header{background:var(--blueprint);color:#fff;padding:22px 24px;border-bottom:4px solid var(--amber);}
+.header-inner{max-width:720px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+.header-inner h1{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;color:#B9C7DA;}
+.logout{font-size:0.8rem;color:#D3DCE8;cursor:pointer;text-decoration:underline;}
+
+main{max-width:720px;margin:0 auto;padding:28px 20px 70px;}
+
+.tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
+.tab-btn{
+  padding:9px 16px;border-radius:20px;border:1px solid var(--line);background:#fff;
+  font-family:'Inter';font-size:0.85rem;font-weight:600;color:var(--blueprint);cursor:pointer;
+}
+.tab-btn.active{background:var(--blueprint);color:#fff;border-color:var(--blueprint);}
+
+.panel{display:none;background:#fff;border:1px solid var(--line);border-radius:6px;padding:24px;}
+.panel.active{display:block;}
+.panel h2{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;color:var(--blueprint);margin-bottom:18px;}
+
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:0.8rem;font-weight:600;color:var(--blueprint);margin-bottom:5px;}
+.field input, .field select, .field textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:4px;
+  font-family:'Inter';font-size:0.9rem;background:var(--paper);
+}
+.field textarea{min-height:80px;resize:vertical;}
+.field input[type="file"]{padding:8px;background:#fff;}
+.field input:focus, .field select:focus, .field textarea:focus{outline:2px solid var(--amber);outline-offset:1px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.checkbox-row input{width:auto;}
+.checkbox-row label{margin:0;font-weight:600;color:var(--charcoal);font-size:0.88rem;}
+
+.btn{padding:12px 20px;border:none;border-radius:4px;background:var(--blueprint);color:#fff;font-weight:600;font-size:0.9rem;cursor:pointer;font-family:'Inter';}
+.btn:hover{background:var(--blueprint-deep);}
+.btn:disabled{background:var(--concrete);cursor:default;}
+.status-msg{font-size:0.85rem;margin-top:14px;min-height:1.2em;}
+.status-msg.ok{color:var(--verified-deep);}
+.status-msg.err{color:var(--error);}
+
+.hint{font-size:0.78rem;color:var(--concrete);margin-top:-10px;margin-bottom:16px;}
+</style>
+</head>
+<body>
+
+<div id="loginView">
+  <div class="login-card">
+    <div class="login-eyebrow">SiteWatch · Admin</div>
+    <h1>Team access</h1>
+    <div class="field">
+      <label for="adminPin">Admin PIN</label>
+      <input id="adminPin" type="password" placeholder="Enter the admin PIN">
+    </div>
+    <button class="btn" id="adminLoginBtn" style="width:100%;">Enter</button>
+    <p class="status-msg" id="loginMsg"></p>
+  </div>
+</div>
+
+<div id="appView" style="display:none;">
+  <header>
+    <div class="header-inner">
+      <div>
+        <div class="eyebrow">SiteWatch</div>
+        <h1>Admin Upload</h1>
+      </div>
+      <span class="logout" id="logoutBtn">Log out</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <div class="tab-btn active" data-tab="visit">Log Site Visit</div>
+      <div class="tab-btn" data-tab="expense">Log Expense</div>
+      <div class="tab-btn" data-tab="milestone">Add Milestone</div>
+      <div class="tab-btn" data-tab="project">New Project</div>
+    </div>
+
+    <!-- LOG SITE VISIT -->
+    <div class="panel active" id="panel-visit">
+      <h2>Log a Site Visit</h2>
+      <div class="field">
+        <label for="visitProject">Project</label>
+        <select id="visitProject"></select>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="visitDate">Date</label>
+          <input id="visitDate" type="date">
+        </div>
+        <div class="field">
+          <label for="visitWeek">Week label</label>
+          <input id="visitWeek" placeholder="e.g. Week 19, Roofing stage">
+        </div>
+      </div>
+      <div class="field">
+        <label for="visitNotes">Site notes</label>
+        <textarea id="visitNotes" placeholder="What happened on site this visit?"></textarea>
+      </div>
+      <div class="field">
+        <label for="visitPhotos">Photos (up to 3)</label>
+        <input id="visitPhotos" type="file" accept="image/*" multiple>
+      </div>
+      <div class="hint">Uploads go straight to Google Drive and link automatically — no need to upload elsewhere first.</div>
+      <div class="checkbox-row">
+        <input id="visitVerified" type="checkbox">
+        <label for="visitVerified">Mark this visit as verified (releases the linked expenses to the client's budget total)</label>
+      </div>
+      <button class="btn" id="submitVisitBtn">Submit Site Visit</button>
+      <p class="status-msg" id="visitMsg"></p>
+    </div>
+
+    <!-- LOG EXPENSE -->
+    <div class="panel" id="panel-expense">
+      <h2>Log an Expense</h2>
+      <div class="field">
+        <label for="expProject">Project</label>
+        <select id="expProject"></select>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="expDate">Date</label>
+          <input id="expDate" type="date">
+        </div>
+        <div class="field">
+          <label for="expAmount">Amount (₦)</label>
+          <input id="expAmount" type="number" placeholder="e.g. 840000">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="expItem">Item</label>
+          <input id="expItem" placeholder="e.g. Aluminium roofing sheets (120)">
+        </div>
+        <div class="field">
+          <label for="expCategory">Category</label>
+          <input id="expCategory" placeholder="e.g. Materials, Labour">
+        </div>
+      </div>
+      <div class="field">
+        <label for="expReceipt">Receipt photo</label>
+        <input id="expReceipt" type="file" accept="image/*">
+      </div>
+      <div class="hint">Match the expense Date to the Site Visit Date so they group together on the client's report.</div>
+      <button class="btn" id="submitExpenseBtn">Submit Expense</button>
+      <p class="status-msg" id="expenseMsg"></p>
+    </div>
+
+    <!-- ADD MILESTONE -->
+    <div class="panel" id="panel-milestone">
+      <h2>Add a Milestone</h2>
+      <div class="field">
+        <label for="msProject">Project</label>
+        <select id="msProject"></select>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="msOrder">Order</label>
+          <input id="msOrder" type="number" placeholder="e.g. 1">
+        </div>
+        <div class="field">
+          <label for="msStatus">Status</label>
+          <select id="msStatus">
+            <option value="pending">Pending</option>
+            <option value="active">In progress</option>
+            <option value="done">Verified / Done</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="msName">Milestone name</label>
+        <input id="msName" placeholder="e.g. Foundation, Roofing">
+      </div>
+      <button class="btn" id="submitMilestoneBtn">Add Milestone</button>
+      <p class="status-msg" id="milestoneMsg"></p>
+    </div>
+
+    <!-- NEW PROJECT -->
+    <div class="panel" id="panel-project">
+      <h2>Start a New Project</h2>
+      <div class="row2">
+        <div class="field">
+          <label for="pjId">Project ID</label>
+          <input id="pjId" placeholder="e.g. OYE-2026-01">
+        </div>
+        <div class="field">
+          <label for="pjPin">Client PIN</label>
+          <input id="pjPin" placeholder="e.g. 4521">
+        </div>
+      </div>
+      <div class="field">
+        <label for="pjClient">Client name</label>
+        <input id="pjClient" placeholder="e.g. Oyelaran Family">
+      </div>
+      <div class="field">
+        <label for="pjName">Project name</label>
+        <input id="pjName" placeholder="e.g. Oyelaran Residence, Ibadan">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="pjLocation">Location</label>
+          <input id="pjLocation" placeholder="e.g. Ibadan">
+        </div>
+        <div class="field">
+          <label for="pjBudget">Total budget (₦)</label>
+          <input id="pjBudget" type="number" placeholder="e.g. 9600000">
+        </div>
+      </div>
+      <div class="field">
+        <label for="pjStart">Start date</label>
+        <input id="pjStart" type="date">
+      </div>
+      <button class="btn" id="submitProjectBtn">Create Project</button>
+      <p class="status-msg" id="projectMsg"></p>
+    </div>
+  </main>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzE_-Pr_PIOesfNdkjUmaLY-ktZdlu9j-juQ6eqyYbibeKVO_PxVoZZhzGztOh41rLu/exec";
+let adminPin = '';
+
+document.getElementById('adminLoginBtn').addEventListener('click', async ()=>{
+  const pin = document.getElementById('adminPin').value.trim();
+  const msg = document.getElementById('loginMsg');
+  if(!pin){ msg.className='status-msg err'; msg.textContent='Enter the admin PIN.'; return; }
+  msg.className='status-msg'; msg.textContent='Checking...';
+  try{
+    const res = await fetch(API_URL + '?' + new URLSearchParams({action:'listProjects', adminPin: pin}));
+    const data = await res.json();
+    if(data.success){
+      adminPin = pin;
+      document.getElementById('loginView').style.display='none';
+      document.getElementById('appView').style.display='block';
+      populateProjectDropdowns(data.projects);
+    } else {
+      msg.className='status-msg err'; msg.textContent = data.message || 'Incorrect PIN.';
+    }
+  } catch(e){
+    msg.className='status-msg err'; msg.textContent='Could not connect. Try again.';
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  adminPin = '';
+  document.getElementById('appView').style.display='none';
+  document.getElementById('loginView').style.display='flex';
+  document.getElementById('adminPin').value = '';
+});
+
+function populateProjectDropdowns(projects){
+  const opts = (projects||[]).map(p => `<option value="${p.projectId}">${p.projectName} (${p.projectId})</option>`).join('');
+  ['visitProject','expProject','msProject'].forEach(id=>{
+    document.getElementById(id).innerHTML = opts || '<option value="">No projects yet — create one first</option>';
+  });
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+function fileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=> resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function postJson(payload){
+  const res = await fetch(API_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(Object.assign({adminPin}, payload))
+  });
+  return res.json();
+}
+
+// SITE VISIT
+document.getElementById('submitVisitBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('submitVisitBtn');
+  const msg = document.getElementById('visitMsg');
+  const projectId = document.getElementById('visitProject').value;
+  const date = document.getElementById('visitDate').value;
+  if(!projectId || !date){ msg.className='status-msg err'; msg.textContent='Project and date are required.'; return; }
+
+  btn.disabled = true; msg.className='status-msg'; msg.textContent='Uploading photos and saving...';
+  try{
+    const files = Array.from(document.getElementById('visitPhotos').files).slice(0,3);
+    const photos = [];
+    for(const f of files){
+      photos.push({ data: await fileToBase64(f), mimeType: f.type, fileName: f.name });
+    }
+    const data = await postJson({
+      action:'addEntry', projectId, date,
+      weekLabel: document.getElementById('visitWeek').value,
+      notes: document.getElementById('visitNotes').value,
+      verified: document.getElementById('visitVerified').checked,
+      photos
+    });
+    if(data.success){
+      msg.className='status-msg ok'; msg.textContent = data.message;
+      document.getElementById('visitWeek').value='';
+      document.getElementById('visitNotes').value='';
+      document.getElementById('visitPhotos').value='';
+      document.getElementById('visitVerified').checked=false;
+    } else {
+      msg.className='status-msg err'; msg.textContent = data.message;
+    }
+  } catch(e){
+    msg.className='status-msg err'; msg.textContent='Something went wrong. Try again.';
+  }
+  btn.disabled = false;
+});
+
+// EXPENSE
+document.getElementById('submitExpenseBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('submitExpenseBtn');
+  const msg = document.getElementById('expenseMsg');
+  const projectId = document.getElementById('expProject').value;
+  const date = document.getElementById('expDate').value;
+  const item = document.getElementById('expItem').value;
+  const amount = document.getElementById('expAmount').value;
+  if(!projectId || !date || !item || !amount){ msg.className='status-msg err'; msg.textContent='Project, date, item, and amount are required.'; return; }
+
+  btn.disabled = true; msg.className='status-msg'; msg.textContent='Uploading receipt and saving...';
+  try{
+    let receipt = null;
+    const file = document.getElementById('expReceipt').files[0];
+    if(file){
+      receipt = { data: await fileToBase64(file), mimeType: file.type, fileName: file.name };
+    }
+    const data = await postJson({
+      action:'addExpense', projectId, date, item, amount,
+      category: document.getElementById('expCategory').value,
+      receipt
+    });
+    if(data.success){
+      msg.className='status-msg ok'; msg.textContent = data.message;
+      document.getElementById('expItem').value='';
+      document.getElementById('expCategory').value='';
+      document.getElementById('expAmount').value='';
+      document.getElementById('expReceipt').value='';
+    } else {
+      msg.className='status-msg err'; msg.textContent = data.message;
+    }
+  } catch(e){
+    msg.className='status-msg err'; msg.textContent='Something went wrong. Try again.';
+  }
+  btn.disabled = false;
+});
+
+// MILESTONE
+document.getElementById('submitMilestoneBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('milestoneMsg');
+  const projectId = document.getElementById('msProject').value;
+  const name = document.getElementById('msName').value;
+  if(!projectId || !name){ msg.className='status-msg err'; msg.textContent='Project and milestone name are required.'; return; }
+  msg.className='status-msg'; msg.textContent='Saving...';
+  const data = await postJson({
+    action:'addMilestone', projectId, name,
+    order: document.getElementById('msOrder').value || 1,
+    status: document.getElementById('msStatus').value
+  });
+  if(data.success){
+    msg.className='status-msg ok'; msg.textContent = data.message;
+    document.getElementById('msName').value=''; document.getElementById('msOrder').value='';
+  } else {
+    msg.className='status-msg err'; msg.textContent = data.message;
+  }
+});
+
+// NEW PROJECT
+document.getElementById('submitProjectBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('projectMsg');
+  const projectId = document.getElementById('pjId').value.trim();
+  const pin = document.getElementById('pjPin').value.trim();
+  const clientName = document.getElementById('pjClient').value.trim();
+  const projectName = document.getElementById('pjName').value.trim();
+  if(!projectId || !pin || !clientName || !projectName){
+    msg.className='status-msg err'; msg.textContent='Project ID, PIN, client name, and project name are required.'; return;
+  }
+  msg.className='status-msg'; msg.textContent='Creating...';
+  const data = await postJson({
+    action:'addProject', projectId, pin, clientName, projectName,
+    location: document.getElementById('pjLocation').value,
+    totalBudget: document.getElementById('pjBudget').value,
+    startDate: document.getElementById('pjStart').value
+  });
+  if(data.success){
+    msg.className='status-msg ok'; msg.textContent = data.message + ' Reload this page to see it in the dropdowns.';
+    ['pjId','pjPin','pjClient','pjName','pjLocation','pjBudget','pjStart'].forEach(id=>document.getElementById(id).value='');
+  } else {
+    msg.className='status-msg err'; msg.textContent = data.message;
+  }
+});
+</script>
+</body>
+</html>
