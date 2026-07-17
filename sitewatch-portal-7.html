@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiteWatch — Client Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F2EA; --blueprint:#1F3A5F; --blueprint-deep:#122438;
+  --concrete:#8C8577; --amber:#D9862B; --verified:#3F7A55; --verified-deep:#2C5A3E;
+  --charcoal:#221F1B; --line:rgba(31,58,95,0.16); --line-soft:rgba(31,58,95,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Inter',sans-serif;background:var(--paper);color:var(--charcoal);line-height:1.55;
+  background-image:linear-gradient(var(--line-soft) 1px, transparent 1px),linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+  background-size:28px 28px;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+a{color:inherit;}
+
+/* Login */
+#loginView{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.login-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:34px 30px;max-width:360px;width:100%;box-shadow:0 10px 30px rgba(18,36,56,0.08);}
+.login-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--amber);margin-bottom:8px;}
+.login-card h1{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;color:var(--blueprint);margin-bottom:22px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:0.78rem;font-weight:600;color:var(--blueprint);margin-bottom:5px;}
+.field input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:4px;font-family:'Inter';font-size:0.92rem;background:var(--paper);}
+.field input:focus{outline:2px solid var(--amber);outline-offset:1px;}
+.btn{width:100%;padding:12px;border:none;border-radius:4px;background:var(--blueprint);color:#fff;font-weight:600;font-size:0.92rem;cursor:pointer;font-family:'Inter';margin-top:6px;}
+.btn:hover{background:var(--blueprint-deep);}
+.login-msg{font-size:0.82rem;margin-top:12px;text-align:center;min-height:1em;}
+
+/* Header */
+header{background:var(--blueprint);color:#fff;padding:28px 24px 26px;border-bottom:4px solid var(--amber);}
+.header-inner{max-width:880px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:#B9C7DA;margin-bottom:10px;}
+header h1{font-family:'Space Grotesk',sans-serif;font-size:1.7rem;font-weight:600;margin-bottom:6px;}
+.header-meta{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:0.86rem;color:#D3DCE8;}
+.header-meta span b{color:#fff;font-weight:600;}
+.logout{font-size:0.8rem;color:#D3DCE8;cursor:pointer;text-decoration:underline;white-space:nowrap;}
+
+/* Status bar */
+.status-bar{max-width:880px;margin:-22px auto 0;padding:0 24px;}
+.status-cards{background:#fff;border:1px solid var(--line);border-radius:4px;display:grid;grid-template-columns:repeat(3,1fr);box-shadow:0 6px 18px rgba(18,36,56,0.08);}
+.status-cell{padding:18px 16px;border-right:1px solid var(--line-soft);}
+.status-cell:last-child{border-right:none;}
+.status-label{font-family:'IBM Plex Mono',monospace;font-size:0.66rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--concrete);margin-bottom:6px;}
+.status-value{font-family:'Space Grotesk',sans-serif;font-size:1.35rem;font-weight:600;color:var(--blueprint);}
+.status-value small{font-family:'Inter';font-size:0.72rem;font-weight:500;color:var(--concrete);display:block;margin-top:2px;}
+
+main{max-width:880px;margin:0 auto;padding:34px 24px 70px;}
+.section-label{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--blueprint);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--line);}
+
+.milestones{display:flex;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:40px;}
+.milestone{flex:1 1 20%;padding:16px 14px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);text-align:center;min-width:120px;}
+.milestone .dot{width:10px;height:10px;border-radius:50%;margin:0 auto 8px;background:var(--line);}
+.milestone.done .dot{background:var(--verified);}
+.milestone.active .dot{background:var(--amber);}
+.milestone-name{font-size:0.78rem;font-weight:600;}
+.milestone-state{font-family:'IBM Plex Mono',monospace;font-size:0.64rem;color:var(--concrete);margin-top:3px;text-transform:uppercase;}
+.milestone.done .milestone-state{color:var(--verified-deep);}
+.milestone.active .milestone-state{color:var(--amber);}
+
+.entry{position:relative;background:#fff;border:1px solid var(--line);border-radius:4px;margin-bottom:22px;overflow:hidden;}
+.entry-head{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 20px 12px;border-bottom:1px solid var(--line-soft);}
+.entry-date{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.02rem;color:var(--blueprint);}
+.entry-week{font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--concrete);text-transform:uppercase;margin-top:2px;}
+.stamp{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;font-weight:600;letter-spacing:0.08em;color:var(--verified-deep);border:2px solid var(--verified);border-radius:3px;padding:5px 10px;transform:rotate(-4deg);white-space:nowrap;background:rgba(63,122,85,0.06);}
+.stamp.pending{color:var(--concrete);border-color:var(--line);background:transparent;transform:none;}
+.entry-body{padding:16px 20px 20px;}
+.photo-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.photo-tile img{width:100%;height:100%;object-fit:cover;border-radius:3px;display:block;}
+.photo-tile{aspect-ratio:4/3;background:linear-gradient(135deg,#E4E9EF,#D6DDE6);border:1px solid var(--line-soft);border-radius:3px;overflow:hidden;}
+.notes{font-size:0.88rem;color:#3A362F;margin-bottom:16px;}
+.expense-table{width:100%;border-collapse:collapse;margin-bottom:14px;}
+.expense-table th{font-family:'IBM Plex Mono',monospace;font-size:0.64rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--concrete);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);}
+.expense-table td{font-size:0.82rem;padding:8px 8px;border-bottom:1px solid var(--line-soft);vertical-align:middle;}
+.expense-table td.amt{font-family:'IBM Plex Mono',monospace;text-align:right;white-space:nowrap;}
+.check{color:var(--verified);font-weight:700;}
+.receipt-link{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--blueprint);text-decoration:underline;text-underline-offset:2px;}
+.release-bar{display:flex;justify-content:space-between;align-items:center;background:var(--paper);border:1px dashed var(--line);border-radius:3px;padding:10px 14px;font-size:0.82rem;}
+.release-bar .amt{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--verified-deep);}
+.empty{text-align:center;color:var(--concrete);padding:30px 0;font-size:0.9rem;}
+.loading{text-align:center;color:var(--concrete);padding:30px 0;font-size:0.9rem;}
+
+footer{background:var(--blueprint-deep);color:#B9C7DA;padding:26px 24px;text-align:center;font-size:0.78rem;}
+footer b{color:#fff;}
+
+@media (max-width:600px){
+  .status-cards{grid-template-columns:1fr;}
+  .status-cell{border-right:none;border-bottom:1px solid var(--line-soft);}
+  .milestone{flex:1 1 50%;}
+  .photo-row{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div id="loginView">
+  <div class="login-card">
+    <div class="login-eyebrow">SiteWatch · Client Access</div>
+    <h1>Track your build</h1>
+    <div class="field">
+      <label for="projectId">Project ID</label>
+      <input id="projectId" placeholder="e.g. OYE-2026-01">
+    </div>
+    <div class="field">
+      <label for="pin">PIN</label>
+      <input id="pin" type="password" placeholder="Your access PIN">
+    </div>
+    <button class="btn" id="loginBtn">View Site Log</button>
+    <p class="login-msg" id="loginMsg"></p>
+  </div>
+</div>
+
+<div id="dashView" style="display:none;">
+  <header>
+    <div class="header-inner">
+      <div>
+        <div class="eyebrow">SiteWatch · Remote Site Oversight Report</div>
+        <h1 id="projName">—</h1>
+        <div class="header-meta">
+          <span>Client: <b id="clientName">—</b></span>
+          <span>Location: <b id="projLocation">—</b></span>
+          <span>Started: <b id="projStart">—</b></span>
+        </div>
+      </div>
+      <span class="logout" id="logoutBtn">Log out</span>
+    </div>
+  </header>
+
+  <div class="status-bar">
+    <div class="status-cards">
+      <div class="status-cell">
+        <div class="status-label">Budget released</div>
+        <div class="status-value" id="budgetReleased">—</div>
+      </div>
+      <div class="status-cell">
+        <div class="status-label">Build progress</div>
+        <div class="status-value" id="buildProgress">—</div>
+      </div>
+      <div class="status-cell">
+        <div class="status-label">Last site visit</div>
+        <div class="status-value" id="lastVisit">—</div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="section-label">Milestone Ledger</div>
+    <div class="milestones" id="milestonesArea"><div class="loading">Loading...</div></div>
+
+    <div class="section-label">Weekly Site Log</div>
+    <div id="entriesArea"><div class="loading">Loading...</div></div>
+  </main>
+
+  <footer>
+    <div><b>SiteWatch</b> — weekly verified oversight for diaspora building projects</div>
+    <div style="margin-top:6px;">Every naira released is checked against work seen and receipts collected on site. No exceptions.</div>
+  </footer>
+</div>
+
+<script>
+// ==== SET THIS to your Apps Script Web App URL (must end in /exec) ====
+const API_URL = "https://script.google.com/macros/s/AKfycbzE_-Pr_PIOesfNdkjUmaLY-ktZdlu9j-juQ6eqyYbibeKVO_PxVoZZhzGztOh41rLu/exec";
+
+let currentProject = null;
+
+async function apiCall(params){
+  const url = API_URL + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url);
+  return res.json();
+}
+
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const projectId = document.getElementById('projectId').value.trim();
+  const pin = document.getElementById('pin').value.trim();
+  const msg = document.getElementById('loginMsg');
+  if(!projectId || !pin){ msg.style.color='#B3452E'; msg.textContent='Enter both fields.'; return; }
+  msg.style.color='#8C8577'; msg.textContent='Checking...';
+  try{
+    const data = await apiCall({action:'clientLogin', projectId, pin});
+    if(data.success){
+      currentProject = data;
+      document.getElementById('loginView').style.display='none';
+      document.getElementById('dashView').style.display='block';
+      renderDashboard(data);
+    } else {
+      msg.style.color='#B3452E'; msg.textContent = data.message;
+    }
+  } catch(e){
+    msg.style.color='#B3452E'; msg.textContent='Could not connect. Try again.';
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  currentProject = null;
+  document.getElementById('dashView').style.display='none';
+  document.getElementById('loginView').style.display='flex';
+  document.getElementById('pin').value='';
+});
+
+function money(n){
+  return '₦' + Number(n||0).toLocaleString('en-NG');
+}
+
+function renderDashboard(data){
+  document.getElementById('projName').textContent = data.projectName;
+  document.getElementById('clientName').textContent = data.clientName;
+  document.getElementById('projLocation').textContent = data.location;
+  document.getElementById('projStart').textContent = data.startDate;
+
+  document.getElementById('budgetReleased').innerHTML =
+    money(data.budgetReleased) + ' <small>of ' + money(data.totalBudget) + ' total</small>';
+  document.getElementById('buildProgress').innerHTML =
+    data.progressPercent + '% <small>' + (data.progressNote||'') + '</small>';
+  document.getElementById('lastVisit').innerHTML =
+    (data.lastVisitRelative||'—') + ' <small>' + (data.lastVisitDate||'') + '</small>';
+
+  // Milestones
+  const mArea = document.getElementById('milestonesArea');
+  if(!data.milestones || data.milestones.length===0){
+    mArea.innerHTML = '<div class="empty">No milestones set up yet.</div>';
+  } else {
+    mArea.innerHTML = data.milestones.map(m=>{
+      const cls = m.status==='done' ? 'done' : (m.status==='active' ? 'active' : '');
+      const label = m.status==='done' ? 'Verified' : (m.status==='active' ? 'In progress' : 'Pending');
+      return `<div class="milestone ${cls}"><div class="dot"></div><div class="milestone-name">${m.name}</div><div class="milestone-state">${label}</div></div>`;
+    }).join('');
+  }
+
+  // Weekly entries
+  const eArea = document.getElementById('entriesArea');
+  if(!data.entries || data.entries.length===0){
+    eArea.innerHTML = '<div class="empty">No site visits logged yet.</div>';
+    return;
+  }
+  eArea.innerHTML = data.entries.map(entry=>{
+    const photos = (entry.photos||[]).slice(0,3).map(p=>
+      p ? `<div class="photo-tile"><img src="${p}" alt=""></div>` : ''
+    ).join('') || '<div class="photo-tile"></div><div class="photo-tile"></div><div class="photo-tile"></div>';
+
+    const expenseRows = (entry.expenses||[]).map(ex=>`
+      <tr>
+        <td>${ex.item}</td>
+        <td>${ex.category||''}</td>
+        <td>${ex.receiptLink ? `<span class="check">✓</span> <a class="receipt-link" href="${ex.receiptLink}" target="_blank">view</a>` : '<span style="color:#B3452E;">missing</span>'}</td>
+        <td class="amt">${money(ex.amount)}</td>
+      </tr>`).join('');
+
+    const totalReleased = (entry.expenses||[]).reduce((s,ex)=>s+Number(ex.amount||0),0);
+
+    return `
+    <div class="entry">
+      <div class="entry-head">
+        <div>
+          <div class="entry-date">${entry.date}</div>
+          <div class="entry-week">${entry.weekLabel||''}</div>
+        </div>
+        <div class="stamp ${entry.verified ? '' : 'pending'}">${entry.verified ? '✓ VERIFIED' : 'PENDING REVIEW'}</div>
+      </div>
+      <div class="entry-body">
+        <div class="photo-row">${photos}</div>
+        <div class="notes">${entry.notes||''}</div>
+        ${expenseRows ? `<table class="expense-table"><tr><th>Item</th><th>Category</th><th>Receipt</th><th>Amount</th></tr>${expenseRows}</table>` : ''}
+        ${totalReleased > 0 ? `<div class="release-bar"><span>Fund release ${entry.verified ? 'approved' : 'requested'} this week</span><span class="amt">${money(totalReleased)}</span></div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
