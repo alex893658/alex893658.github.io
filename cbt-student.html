@@ -144,11 +144,11 @@
     <!-- STEP 4: RESULT -->
     <div id="resultStep" class="hidden">
       <div class="score-box">
-        <div style="color:var(--muted); font-weight:600;">Your Score</div>
-        <div class="big" id="scoreDisplay"></div>
+        <div class="big" style="font-size:2.2rem;">Successfully Submitted</div>
         <div class="progress-note" id="scoreDetail"></div>
       </div>
-      <button onclick="location.reload()">Back to Login</button>
+      <button onclick="backToSubjects()">Take Another Subject</button>
+      <button class="secondary" style="margin-top:10px;" onclick="location.reload()">Log Out</button>
     </div>
 
     <div id="loadingBox" class="loading hidden">Please wait...</div>
@@ -207,6 +207,16 @@
       showLoading(false);
       alert('Connection error. Please try again.');
     }
+  }
+
+  async function backToSubjects() {
+    document.getElementById('resultStep').classList.add('hidden');
+    showLoading(true);
+    const subRes = await callApi({ action: 'getSubjects', className: student.className });
+    showLoading(false);
+    const select = document.getElementById('subjectSelect');
+    select.innerHTML = subRes.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+    document.getElementById('subjectStep').classList.remove('hidden');
   }
 
   async function startExam() {
@@ -299,8 +309,7 @@
 
       document.getElementById('examStep').classList.add('hidden');
       document.getElementById('resultStep').classList.remove('hidden');
-      document.getElementById('scoreDisplay').textContent = `${res.score} / ${res.totalMarks}`;
-      document.getElementById('scoreDetail').textContent = `${res.totalQuestions} questions answered`;
+      document.getElementById('scoreDetail').textContent = `${res.totalQuestions} questions submitted for ${student.subject}`;
     } catch (err) {
       showLoading(false);
       alert('Connection error while submitting: ' + err.message);
