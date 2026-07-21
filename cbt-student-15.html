@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TDDC CBT — Student Exam Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0b2545;
+    --green: #1b5e3f;
+    --flame: #e85d2c;
+    --gold: #d8a13a;
+    --bg: #f5f3ee;
+    --card: #ffffff;
+    --text: #1c2430;
+    --muted: #6b7280;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(180deg, var(--navy) 0%, var(--navy) 220px, var(--bg) 220px);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    padding: 32px 20px 60px;
+    text-align: center;
+    color: #fff;
+  }
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    margin: 0;
+  }
+  header p { margin: 4px 0 0; opacity: 0.85; font-size: 0.9rem; }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 16px 60px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(11,37,69,0.12);
+    padding: 28px;
+    margin-top: -30px;
+  }
+  h2 { font-family: 'Fraunces', serif; color: var(--navy); margin-top: 0; }
+  label { display: block; font-weight: 600; margin: 14px 0 6px; font-size: 0.9rem; }
+  input, select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+  }
+  button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 8px;
+    background: var(--flame);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  button:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .error { color: #c0392b; font-size: 0.85rem; margin-top: 8px; display: none; }
+  .hidden { display: none !important; }
+  .student-info {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f2f6f4; border-radius: 10px; padding: 12px 16px; margin-bottom: 18px;
+    font-size: 0.9rem;
+  }
+  .timer {
+    font-weight: 700; color: var(--flame); font-size: 1.1rem;
+  }
+  .q-block { border-bottom: 1px solid #eee; padding: 18px 0; }
+  .q-block:last-child { border-bottom: none; }
+  .q-num { font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .option {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border: 1px solid #e2e2e2; border-radius: 8px; margin-bottom: 8px;
+    cursor: pointer;
+  }
+  .option:hover { border-color: var(--gold); }
+  .option input { width: auto; }
+  .score-box {
+    text-align: center; padding: 30px 10px;
+  }
+  .score-box .big { font-family: 'Fraunces', serif; font-size: 3rem; color: var(--green); }
+  .progress-note { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+  .loading { text-align: center; color: var(--muted); padding: 30px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TDDC Schools & College</h1>
+  <p>Computer-Based Test Portal</p>
+</header>
+
+<div class="wrap">
+  <div class="card">
+
+    <!-- STEP 1: LOGIN -->
+    <div id="loginStep">
+      <h2>Student Login</h2>
+      <label for="studentId">Student ID</label>
+      <input id="studentId" placeholder="e.g. TDDC/2026/001" autocomplete="off">
+      <label for="studentPin">PIN</label>
+      <input id="studentPin" type="password" autocomplete="off">
+      <div class="error" id="loginError">Invalid Student ID or PIN. Please check and try again.</div>
+      <button id="loginBtn" onclick="login()">Continue</button>
+    </div>
+
+    <!-- STEP 2: SUBJECT SELECT -->
+    <div id="subjectStep" class="hidden">
+      <h2>Select Subject</h2>
+      <div class="student-info" id="studentInfoBox"></div>
+      <label for="subjectSelect">Available subjects</label>
+      <select id="subjectSelect"></select>
+      <button onclick="startExam()">Start Exam</button>
+    </div>
+
+    <!-- STEP 3: EXAM -->
+    <div id="examStep" class="hidden">
+      <div class="student-info">
+        <span id="examSubjectLabel"></span>
+        <span class="timer" id="timerLabel">--:--</span>
+      </div>
+      <div id="questionsContainer"></div>
+      <button onclick="submitExamNow()">Submit Exam</button>
+    </div>
+
+    <!-- STEP 4: RESULT -->
+    <div id="resultStep" class="hidden">
+      <div class="score-box">
+        <div class="big" style="font-size:2.2rem;">Successfully Submitted</div>
+        <div class="progress-note" id="scoreDetail"></div>
+      </div>
+      <button onclick="backToSubjects()">Take Another Subject</button>
+      <button class="secondary" style="margin-top:10px;" onclick="location.reload()">Log Out</button>
+    </div>
+
+    <div id="loadingBox" class="loading hidden">Please wait...</div>
+  </div>
+</div>
+
+<script>
+  // ⚠️ Replace with your deployed Apps Script Web App URL
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzPT3ToJxGZXtL047qn5eDfSwflzKdbmyvL50sETzh2lUaLS3-EUxcXrIFUoH0kzuzJ/exec';
+
+  // Fallback values used only if no ExamConfig row exists for a subject (Settings tab in teacher portal)
+  const DEFAULT_QUESTIONS_PER_EXAM = 20;
+  const DEFAULT_DURATION_MINUTES = 30;
+
+  let student = {};
+  let currentQuestions = [];
+  let timerInterval;
+  let secondsLeft;
+
+  function showLoading(show) {
+    document.getElementById('loadingBox').classList.toggle('hidden', !show);
+  }
+
+  async function callApi(payload) {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  }
+
+  async function login() {
+    const id = document.getElementById('studentId').value.trim();
+    const pin = document.getElementById('studentPin').value.trim();
+    if (!id || !pin) return;
+    document.getElementById('loginError').style.display = 'none';
+    showLoading(true);
+    try {
+      const res = await callApi({ action: 'studentLogin', studentId: id, pin });
+      showLoading(false);
+      if (!res.success) {
+        document.getElementById('loginError').style.display = 'block';
+        return;
+      }
+      student = res;
+      document.getElementById('studentInfoBox').innerHTML =
+        `<span><strong>${student.name}</strong> — ${student.className}</span><span>${student.studentId}</span>`;
+
+      const subRes = await callApi({ action: 'getSubjects', className: student.className });
+      const select = document.getElementById('subjectSelect');
+      select.innerHTML = subRes.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+
+      document.getElementById('loginStep').classList.add('hidden');
+      document.getElementById('subjectStep').classList.remove('hidden');
+    } catch (e) {
+      showLoading(false);
+      alert('Connection error. Please try again.');
+    }
+  }
+
+  async function backToSubjects() {
+    document.getElementById('resultStep').classList.add('hidden');
+    showLoading(true);
+    const subRes = await callApi({ action: 'getSubjects', className: student.className });
+    showLoading(false);
+    const select = document.getElementById('subjectSelect');
+    select.innerHTML = subRes.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+    document.getElementById('subjectStep').classList.remove('hidden');
+  }
+
+  async function startExam() {
+    const subject = document.getElementById('subjectSelect').value;
+    showLoading(true);
+
+    try {
+      const configRes = await callApi({ action: 'getExamConfig', subject, className: student.className });
+      const questionsPerExam = configRes.questionsPerExam || DEFAULT_QUESTIONS_PER_EXAM;
+      const durationMinutes = configRes.durationMinutes || DEFAULT_DURATION_MINUTES;
+
+      const res = await callApi({ action: 'getQuestions', subject, className: student.className, limit: questionsPerExam });
+      showLoading(false);
+
+      if (!res.success) {
+        alert('Error loading questions: ' + (res.error || 'unknown error'));
+        return;
+      }
+      if (!res.questions.length) {
+        alert('No questions available for this subject/class yet. (Pool size: ' + (res.poolSize || 0) + ')');
+        return;
+      }
+
+      currentQuestions = res.questions;
+      student.subject = subject;
+
+      document.getElementById('examSubjectLabel').textContent = subject;
+      document.getElementById('questionsContainer').innerHTML = currentQuestions.map((q, i) => `
+        <div class="q-block">
+          <div class="q-num">${i + 1}. ${q.Question}</div>
+          ${q.Options.map((optText, idx) => `
+            <label class="option">
+              <input type="radio" name="q_${q.QuestionID}" value="${String(optText || '').replace(/"/g, '&quot;')}">
+              <span>${String.fromCharCode(65 + idx)}. ${optText}</span>
+            </label>
+          `).join('')}
+        </div>
+      `).join('');
+
+      document.getElementById('subjectStep').classList.add('hidden');
+      document.getElementById('examStep').classList.remove('hidden');
+
+      secondsLeft = durationMinutes * 60;
+      updateTimerLabel();
+      timerInterval = setInterval(() => {
+        secondsLeft--;
+        updateTimerLabel();
+        if (secondsLeft <= 0) {
+          clearInterval(timerInterval);
+          submitExamNow();
+        }
+      }, 1000);
+    } catch (err) {
+      showLoading(false);
+      alert('Connection error while loading the exam: ' + err.message);
+    }
+  }
+
+  function updateTimerLabel() {
+    const m = Math.floor(secondsLeft / 60);
+    const s = secondsLeft % 60;
+    document.getElementById('timerLabel').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  async function submitExamNow() {
+    clearInterval(timerInterval);
+    const answers = {};
+    currentQuestions.forEach(q => {
+      const chosen = document.querySelector(`input[name="q_${q.QuestionID}"]:checked`);
+      if (chosen) answers[q.QuestionID] = chosen.value;
+    });
+
+    showLoading(true);
+    try {
+      const res = await callApi({
+        action: 'submitExam',
+        studentId: student.studentId,
+        name: student.name,
+        className: student.className,
+        subject: student.subject,
+        answers: JSON.stringify(answers),
+        servedQuestionIds: JSON.stringify(currentQuestions.map(q => q.QuestionID))
+      });
+      showLoading(false);
+
+      if (!res.success) {
+        alert('Error submitting exam: ' + (res.error || 'unknown error'));
+        return;
+      }
+
+      document.getElementById('examStep').classList.add('hidden');
+      document.getElementById('resultStep').classList.remove('hidden');
+      document.getElementById('scoreDetail').textContent = `${res.totalQuestions} questions submitted for ${student.subject}`;
+    } catch (err) {
+      showLoading(false);
+      alert('Connection error while submitting: ' + err.message);
+    }
+  }
+</script>
+</body>
+</html>
