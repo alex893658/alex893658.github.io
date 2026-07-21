@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TDDC CBT — Teacher Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0b2545; --green: #1b5e3f; --flame: #e85d2c; --gold: #d8a13a;
+    --bg: #f5f3ee; --card: #ffffff; --text: #1c2430; --muted: #6b7280;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+  }
+  header {
+    background: var(--navy); color: #fff; padding: 24px 20px; text-align: center;
+  }
+  header h1 { font-family: 'Fraunces', serif; margin: 0; font-size: 1.5rem; }
+  header p { margin: 4px 0 0; opacity: 0.85; font-size: 0.9rem; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px 60px; }
+  .card {
+    background: var(--card); border-radius: 14px; box-shadow: 0 6px 20px rgba(11,37,69,0.08);
+    padding: 24px; margin-bottom: 20px;
+  }
+  h2 { font-family: 'Fraunces', serif; color: var(--navy); margin-top: 0; }
+  label { display: block; font-weight: 600; margin: 12px 0 6px; font-size: 0.85rem; }
+  input, select, textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid #d9d9d9; border-radius: 8px;
+    font-size: 0.95rem; font-family: inherit;
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  button {
+    margin-top: 16px; padding: 11px 18px; border: none; border-radius: 8px;
+    background: var(--flame); color: #fff; font-weight: 600; cursor: pointer; font-size: 0.95rem;
+  }
+  button.secondary { background: var(--navy); }
+  button.small { padding: 6px 12px; font-size: 0.8rem; margin-top: 0; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .tab-btn {
+    background: #e8e6df; color: var(--text); margin-top: 0; flex: 1;
+  }
+  .tab-btn.active { background: var(--navy); color: #fff; }
+  table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; }
+  th { color: var(--muted); font-weight: 600; }
+  .hidden { display: none !important; }
+  .error { color: #c0392b; font-size: 0.85rem; margin-top: 8px; }
+  .success { color: var(--green); font-size: 0.85rem; margin-top: 8px; }
+  .muted { color: var(--muted); font-size: 0.85rem; }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
+  .stat-box { background: #f2f6f4; border-radius: 10px; padding: 16px 10px; text-align: center; }
+  .stat-num { font-family: 'Fraunces', serif; font-size: 1.8rem; color: var(--navy); }
+  .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+  @media (max-width: 560px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TDDC Schools & College</h1>
+  <p>Teacher / Exam Admin Portal</p>
+</header>
+
+<div class="wrap">
+
+  <!-- LOGIN -->
+  <div class="card" id="loginCard">
+    <h2>Staff Login</h2>
+    <label>Staff ID</label>
+    <input id="staffId" placeholder="e.g. TDDC-STAFF-01">
+    <label>PIN</label>
+    <input id="pin" type="password">
+    <div class="error hidden" id="loginError">Invalid Staff ID or PIN.</div>
+    <button onclick="teacherLogin()">Login</button>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app" class="hidden">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="tab-btn" onclick="switchTab('add')">Add Question</button>
+      <button class="tab-btn" onclick="switchTab('bulk')">Bulk Upload</button>
+      <button class="tab-btn" onclick="switchTab('manage')">Manage Questions</button>
+      <button class="tab-btn" onclick="switchTab('results')">Results</button>
+      <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="card" id="tab-dashboard">
+      <h2>Overview</h2>
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-box"><div class="stat-num" id="stat_questions">–</div><div class="stat-label">Questions in bank</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat_subjects">–</div><div class="stat-label">Subjects</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat_exams">–</div><div class="stat-label">Exams taken</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat_avg">–</div><div class="stat-label">Average score</div></div>
+      </div>
+
+      <h2 style="margin-top:24px;">By Subject</h2>
+      <table id="subjectBreakdownTable">
+        <thead><tr><th>Subject</th><th>Questions</th><th>Exams Taken</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <h2 style="margin-top:24px;">Recent Results</h2>
+      <table id="recentResultsTable">
+        <thead><tr><th>Student</th><th>Subject</th><th>Score</th><th>Date</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- ADD QUESTION -->
+    <div class="card hidden" id="tab-add">
+      <h2>Add Question</h2>
+      <div class="row2">
+        <div>
+          <label>Subject</label>
+          <input id="q_subject" placeholder="e.g. Mathematics">
+        </div>
+        <div>
+          <label>Class</label>
+          <input id="q_class" placeholder="e.g. JSS1">
+        </div>
+      </div>
+      <label>Question</label>
+      <textarea id="q_question" rows="2"></textarea>
+      <div class="row2">
+        <div><label>Option A</label><input id="q_a"></div>
+        <div><label>Option B</label><input id="q_b"></div>
+      </div>
+      <div class="row2">
+        <div><label>Option C</label><input id="q_c"></div>
+        <div><label>Option D</label><input id="q_d"></div>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Correct Answer</label>
+          <select id="q_correct">
+            <option value="A">A</option><option value="B">B</option>
+            <option value="C">C</option><option value="D">D</option>
+          </select>
+        </div>
+        <div>
+          <label>Marks</label>
+          <input id="q_marks" type="number" value="1" min="1">
+        </div>
+      </div>
+      <button onclick="addQuestion()">Add Question</button>
+      <div class="success hidden" id="addSuccess">Question added.</div>
+    </div>
+
+    <!-- BULK UPLOAD -->
+    <div class="card hidden" id="tab-bulk">
+      <h2>Bulk Upload</h2>
+      <p class="muted">
+        One question per line, fields separated by <code>|</code>:<br>
+        <code>Subject | Class | Question | OptionA | OptionB | OptionC | OptionD | CorrectAnswer | Marks</code><br>
+        Marks is optional (defaults to 1). Leave Class blank for "all classes".
+      </p>
+      <textarea id="bulkText" rows="10" placeholder="Mathematics | JSS1 | What is 7 x 8? | 54 | 56 | 58 | 64 | B | 1
+English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve | Receve | B | 1"></textarea>
+      <button onclick="previewBulk()">Preview</button>
+      <div id="bulkPreviewWrap" class="hidden">
+        <table id="bulkPreviewTable">
+          <thead><tr><th>Subject</th><th>Class</th><th>Question</th><th>Correct</th><th>Marks</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button class="secondary" onclick="confirmBulkUpload()">Confirm & Upload All</button>
+      </div>
+      <div class="error hidden" id="bulkError"></div>
+      <div class="success hidden" id="bulkSuccess"></div>
+    </div>
+
+    <!-- MANAGE QUESTIONS -->
+    <div class="card hidden" id="tab-manage">
+      <h2>Manage Questions</h2>
+      <label>Filter by subject</label>
+      <input id="manageSubjectFilter" placeholder="Leave blank for all">
+      <button onclick="loadQuestions()">Load</button>
+      <table id="questionsTable">
+        <thead><tr><th>Subject</th><th>Class</th><th>Question</th><th>Answer</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="card hidden" id="tab-results">
+      <h2>Results</h2>
+      <label>Filter by subject</label>
+      <input id="resultsSubjectFilter" placeholder="Leave blank for all">
+      <button onclick="loadResults()">Load</button>
+      <table id="resultsTable">
+        <thead><tr><th>Student</th><th>Class</th><th>Subject</th><th>Score</th><th>Date</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="card hidden" id="tab-settings">
+      <h2>Exam Settings</h2>
+      <p class="muted">Set how many random questions each exam pulls, and the time limit, per subject. Leave Class blank to apply to every class taking that subject.</p>
+      <div class="row2">
+        <div>
+          <label>Subject</label>
+          <input id="cfg_subject" placeholder="e.g. Mathematics">
+        </div>
+        <div>
+          <label>Class (optional)</label>
+          <input id="cfg_class" placeholder="e.g. JSS1">
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Questions per exam</label>
+          <input id="cfg_questions" type="number" value="60" min="1">
+        </div>
+        <div>
+          <label>Duration (minutes)</label>
+          <input id="cfg_duration" type="number" value="45" min="1">
+        </div>
+      </div>
+      <button onclick="saveExamConfig()">Save Setting</button>
+      <div class="success hidden" id="cfgSuccess">Saved.</div>
+
+      <h2 style="margin-top:24px;">Current Settings</h2>
+      <table id="configTable">
+        <thead><tr><th>Subject</th><th>Class</th><th>Questions</th><th>Minutes</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ⚠️ Replace with your deployed Apps Script Web App URL (same as student page)
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzPT3ToJxGZXtL047qn5eDfSwflzKdbmyvL50sETzh2lUaLS3-EUxcXrIFUoH0kzuzJ/exec';
+
+  async function callApi(payload) {
+    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+    return res.json();
+  }
+
+  async function teacherLogin() {
+    const staffId = document.getElementById('staffId').value.trim();
+    const pin = document.getElementById('pin').value;
+    const res = await callApi({ action: 'teacherLogin', staffId, pin });
+    if (!res.success) {
+      document.getElementById('loginError').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('loginCard').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    loadDashboard();
+  }
+
+  function switchTab(tab) {
+    ['dashboard', 'add', 'bulk', 'manage', 'results', 'settings'].forEach(t => {
+      document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+    });
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    if (tab === 'dashboard') loadDashboard();
+    if (tab === 'manage') loadQuestions();
+    if (tab === 'results') loadResults();
+    if (tab === 'settings') loadExamConfigs();
+  }
+
+  async function loadDashboard() {
+    const [qRes, rRes] = await Promise.all([
+      callApi({ action: 'getAllQuestions' }),
+      callApi({ action: 'getResults' })
+    ]);
+    const questions = qRes.questions || [];
+    const results = rRes.results || [];
+
+    const subjects = [...new Set(questions.map(q => q.Subject))];
+    document.getElementById('stat_questions').textContent = questions.length;
+    document.getElementById('stat_subjects').textContent = subjects.length;
+    document.getElementById('stat_exams').textContent = results.length;
+
+    const avg = results.length
+      ? Math.round(results.reduce((sum, r) => sum + (Number(r.Score) / (Number(r.TotalMarks) || 1)), 0) / results.length * 100)
+      : null;
+    document.getElementById('stat_avg').textContent = avg !== null ? avg + '%' : '–';
+
+    document.querySelector('#subjectBreakdownTable tbody').innerHTML = subjects.map(s => {
+      const qCount = questions.filter(q => q.Subject === s).length;
+      const eCount = results.filter(r => r.Subject === s).length;
+      return `<tr><td>${s}</td><td>${qCount}</td><td>${eCount}</td></tr>`;
+    }).join('') || '<tr><td colspan="3" class="muted">No questions yet.</td></tr>';
+
+    const recent = results.slice(-8).reverse();
+    document.querySelector('#recentResultsTable tbody').innerHTML = recent.map(r => `
+      <tr>
+        <td>${r.Name} <span class="muted">(${r.StudentID})</span></td>
+        <td>${r.Subject}</td>
+        <td>${r.Score} / ${r.TotalMarks}</td>
+        <td>${new Date(r.Timestamp).toLocaleDateString()}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="4" class="muted">No exams taken yet.</td></tr>';
+  }
+
+  let parsedBulkQuestions = [];
+
+  function previewBulk() {
+    const raw = document.getElementById('bulkText').value.trim();
+    const errorBox = document.getElementById('bulkError');
+    const successBox = document.getElementById('bulkSuccess');
+    errorBox.classList.add('hidden');
+    successBox.classList.add('hidden');
+    document.getElementById('bulkPreviewWrap').classList.add('hidden');
+
+    if (!raw) return;
+    const lines = raw.split('\n').map(l => l.trim()).filter(l => l);
+    const parsed = [];
+    const problems = [];
+
+    lines.forEach((line, i) => {
+      const parts = line.split('|').map(p => p.trim());
+      if (parts.length < 8) {
+        problems.push(`Line ${i + 1}: expected at least 8 fields separated by "|", found ${parts.length}.`);
+        return;
+      }
+      const [subject, className, question, optionA, optionB, optionC, optionD, correctAnswer, marks] = parts;
+      if (!subject || !question || !optionA || !optionB || !correctAnswer) {
+        problems.push(`Line ${i + 1}: missing a required field (subject, question, option A/B, or correct answer).`);
+        return;
+      }
+      if (!['A', 'B', 'C', 'D'].includes(correctAnswer.toUpperCase())) {
+        problems.push(`Line ${i + 1}: correct answer must be A, B, C, or D — got "${correctAnswer}".`);
+        return;
+      }
+      parsed.push({
+        subject, className, question, optionA, optionB, optionC, optionD,
+        correctAnswer: correctAnswer.toUpperCase(),
+        marks: Number(marks) || 1
+      });
+    });
+
+    if (problems.length) {
+      errorBox.textContent = problems.join(' ');
+      errorBox.classList.remove('hidden');
+    }
+    if (parsed.length) {
+      parsedBulkQuestions = parsed;
+      document.querySelector('#bulkPreviewTable tbody').innerHTML = parsed.map(q => `
+        <tr>
+          <td>${q.subject}</td>
+          <td>${q.className || '<span class="muted">all</span>'}</td>
+          <td>${q.question}</td>
+          <td>${q.correctAnswer}</td>
+          <td>${q.marks}</td>
+        </tr>
+      `).join('');
+      document.getElementById('bulkPreviewWrap').classList.remove('hidden');
+    }
+  }
+
+  async function confirmBulkUpload() {
+    if (!parsedBulkQuestions.length) return;
+    const res = await callApi({ action: 'bulkAddQuestions', questions: JSON.stringify(parsedBulkQuestions) });
+    const successBox = document.getElementById('bulkSuccess');
+    if (res.success) {
+      successBox.textContent = `${res.added} question(s) uploaded successfully.`;
+      successBox.classList.remove('hidden');
+      document.getElementById('bulkText').value = '';
+      document.getElementById('bulkPreviewWrap').classList.add('hidden');
+      parsedBulkQuestions = [];
+    } else {
+      document.getElementById('bulkError').textContent = res.error || 'Upload failed.';
+      document.getElementById('bulkError').classList.remove('hidden');
+    }
+  }
+
+  async function addQuestion() {
+    const payload = {
+      action: 'addQuestion',
+      subject: document.getElementById('q_subject').value.trim(),
+      className: document.getElementById('q_class').value.trim(),
+      question: document.getElementById('q_question').value.trim(),
+      optionA: document.getElementById('q_a').value.trim(),
+      optionB: document.getElementById('q_b').value.trim(),
+      optionC: document.getElementById('q_c').value.trim(),
+      optionD: document.getElementById('q_d').value.trim(),
+      correctAnswer: document.getElementById('q_correct').value,
+      marks: Number(document.getElementById('q_marks').value) || 1
+    };
+    if (!payload.subject || !payload.question || !payload.optionA || !payload.optionB) {
+      alert('Please fill in subject, question, and at least options A and B.');
+      return;
+    }
+    const res = await callApi(payload);
+    if (res.success) {
+      document.getElementById('addSuccess').classList.remove('hidden');
+      setTimeout(() => document.getElementById('addSuccess').classList.add('hidden'), 2000);
+      ['q_question','q_a','q_b','q_c','q_d'].forEach(id => document.getElementById(id).value = '');
+    }
+  }
+
+  async function loadQuestions() {
+    const subject = document.getElementById('manageSubjectFilter').value.trim();
+    const res = await callApi({ action: 'getAllQuestions', subject });
+    const tbody = document.querySelector('#questionsTable tbody');
+    tbody.innerHTML = res.questions.map(q => `
+      <tr>
+        <td>${q.Subject}</td>
+        <td>${q.Class}</td>
+        <td>${q.Question}</td>
+        <td>${q.CorrectAnswer}</td>
+        <td><button class="small secondary" onclick="deleteQuestion('${q.QuestionID}')">Delete</button></td>
+      </tr>
+    `).join('') || '<tr><td colspan="5" class="muted">No questions found.</td></tr>';
+  }
+
+  async function deleteQuestion(id) {
+    if (!confirm('Delete this question?')) return;
+    await callApi({ action: 'deleteQuestion', questionId: id });
+    loadQuestions();
+  }
+
+  async function loadResults() {
+    const subject = document.getElementById('resultsSubjectFilter').value.trim();
+    const res = await callApi({ action: 'getResults', subject });
+    const tbody = document.querySelector('#resultsTable tbody');
+    tbody.innerHTML = res.results.map(r => `
+      <tr>
+        <td>${r.Name} <span class="muted">(${r.StudentID})</span></td>
+        <td>${r.Class}</td>
+        <td>${r.Subject}</td>
+        <td>${r.Score} / ${r.TotalMarks}</td>
+        <td>${new Date(r.Timestamp).toLocaleDateString()}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="5" class="muted">No results yet.</td></tr>';
+  }
+
+  async function saveExamConfig() {
+    const subject = document.getElementById('cfg_subject').value.trim();
+    const className = document.getElementById('cfg_class').value.trim();
+    const questionsPerExam = document.getElementById('cfg_questions').value;
+    const durationMinutes = document.getElementById('cfg_duration').value;
+    if (!subject || !questionsPerExam || !durationMinutes) {
+      alert('Please fill in subject, questions per exam, and duration.');
+      return;
+    }
+    await callApi({ action: 'setExamConfig', subject, className, questionsPerExam, durationMinutes });
+    document.getElementById('cfgSuccess').classList.remove('hidden');
+    setTimeout(() => document.getElementById('cfgSuccess').classList.add('hidden'), 2000);
+    document.getElementById('cfg_subject').value = '';
+    document.getElementById('cfg_class').value = '';
+    loadExamConfigs();
+  }
+
+  async function loadExamConfigs() {
+    const res = await callApi({ action: 'getAllExamConfigs' });
+    const tbody = document.querySelector('#configTable tbody');
+    tbody.innerHTML = (res.configs || []).map(c => `
+      <tr>
+        <td>${c.Subject}</td>
+        <td>${c.Class || '<span class="muted">all</span>'}</td>
+        <td>${c.QuestionsPerExam}</td>
+        <td>${c.DurationMinutes}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="4" class="muted">No custom settings yet — subjects will use the default (20 questions, 30 minutes) until you set one.</td></tr>';
+  }
+</script>
+</body>
+</html>
