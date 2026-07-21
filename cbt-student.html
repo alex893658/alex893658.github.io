@@ -26,7 +26,7 @@
     min-height: 100vh;
   }
   header {
-    padding: 28px 20px 20px;
+    padding: 32px 20px 60px;
     text-align: center;
     color: #fff;
   }
@@ -46,7 +46,7 @@
     border-radius: 14px;
     box-shadow: 0 10px 30px rgba(11,37,69,0.12);
     padding: 28px;
-    margin-top: -60px;
+    margin-top: -30px;
   }
   h2 { font-family: 'Fraunces', serif; color: var(--navy); margin-top: 0; }
   label { display: block; font-weight: 600; margin: 14px 0 6px; font-size: 0.9rem; }
@@ -239,7 +239,7 @@
           <div class="q-num">${i + 1}. ${q.Question}</div>
           ${q.Options.map((optText, idx) => `
             <label class="option">
-              <input type="radio" name="q_${q.QuestionID}" value="${optText.replace(/"/g, '&quot;')}">
+              <input type="radio" name="q_${q.QuestionID}" value="${String(optText || '').replace(/"/g, '&quot;')}">
               <span>${String.fromCharCode(65 + idx)}. ${optText}</span>
             </label>
           `).join('')}
