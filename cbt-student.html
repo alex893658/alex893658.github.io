@@ -213,45 +213,56 @@
     const subject = document.getElementById('subjectSelect').value;
     showLoading(true);
 
-    const configRes = await callApi({ action: 'getExamConfig', subject, className: student.className });
-    const questionsPerExam = configRes.questionsPerExam || DEFAULT_QUESTIONS_PER_EXAM;
-    const durationMinutes = configRes.durationMinutes || DEFAULT_DURATION_MINUTES;
+    try {
+      const configRes = await callApi({ action: 'getExamConfig', subject, className: student.className });
+      const questionsPerExam = configRes.questionsPerExam || DEFAULT_QUESTIONS_PER_EXAM;
+      const durationMinutes = configRes.durationMinutes || DEFAULT_DURATION_MINUTES;
 
-    const res = await callApi({ action: 'getQuestions', subject, className: student.className, limit: questionsPerExam });
-    showLoading(false);
-    if (!res.success || !res.questions.length) {
-      alert('No questions available for this subject yet.');
-      return;
-    }
-    currentQuestions = res.questions;
-    student.subject = subject;
+      const res = await callApi({ action: 'getQuestions', subject, className: student.className, limit: questionsPerExam });
+      showLoading(false);
 
-    document.getElementById('examSubjectLabel').textContent = subject;
-    document.getElementById('questionsContainer').innerHTML = currentQuestions.map((q, i) => `
-      <div class="q-block">
-        <div class="q-num">${i + 1}. ${q.Question}</div>
-        ${q.Options.map((optText, idx) => `
-          <label class="option">
-            <input type="radio" name="q_${q.QuestionID}" value="${optText.replace(/"/g, '&quot;')}">
-            <span>${String.fromCharCode(65 + idx)}. ${optText}</span>
-          </label>
-        `).join('')}
-      </div>
-    `).join('');
-
-    document.getElementById('subjectStep').classList.add('hidden');
-    document.getElementById('examStep').classList.remove('hidden');
-
-    secondsLeft = durationMinutes * 60;
-    updateTimerLabel();
-    timerInterval = setInterval(() => {
-      secondsLeft--;
-      updateTimerLabel();
-      if (secondsLeft <= 0) {
-        clearInterval(timerInterval);
-        submitExamNow();
+      if (!res.success) {
+        alert('Error loading questions: ' + (res.error || 'unknown error'));
+        return;
       }
-    }, 1000);
+      if (!res.questions.length) {
+        alert('No questions available for this subject/class yet. (Pool size: ' + (res.poolSize || 0) + ')');
+        return;
+      }
+
+      currentQuestions = res.questions;
+      student.subject = subject;
+
+      document.getElementById('examSubjectLabel').textContent = subject;
+      document.getElementById('questionsContainer').innerHTML = currentQuestions.map((q, i) => `
+        <div class="q-block">
+          <div class="q-num">${i + 1}. ${q.Question}</div>
+          ${q.Options.map((optText, idx) => `
+            <label class="option">
+              <input type="radio" name="q_${q.QuestionID}" value="${optText.replace(/"/g, '&quot;')}">
+              <span>${String.fromCharCode(65 + idx)}. ${optText}</span>
+            </label>
+          `).join('')}
+        </div>
+      `).join('');
+
+      document.getElementById('subjectStep').classList.add('hidden');
+      document.getElementById('examStep').classList.remove('hidden');
+
+      secondsLeft = durationMinutes * 60;
+      updateTimerLabel();
+      timerInterval = setInterval(() => {
+        secondsLeft--;
+        updateTimerLabel();
+        if (secondsLeft <= 0) {
+          clearInterval(timerInterval);
+          submitExamNow();
+        }
+      }, 1000);
+    } catch (err) {
+      showLoading(false);
+      alert('Connection error while loading the exam: ' + err.message);
+    }
   }
 
   function updateTimerLabel() {
@@ -269,21 +280,31 @@
     });
 
     showLoading(true);
-    const res = await callApi({
-      action: 'submitExam',
-      studentId: student.studentId,
-      name: student.name,
-      className: student.className,
-      subject: student.subject,
-      answers: JSON.stringify(answers),
-      servedQuestionIds: JSON.stringify(currentQuestions.map(q => q.QuestionID))
-    });
-    showLoading(false);
+    try {
+      const res = await callApi({
+        action: 'submitExam',
+        studentId: student.studentId,
+        name: student.name,
+        className: student.className,
+        subject: student.subject,
+        answers: JSON.stringify(answers),
+        servedQuestionIds: JSON.stringify(currentQuestions.map(q => q.QuestionID))
+      });
+      showLoading(false);
 
-    document.getElementById('examStep').classList.add('hidden');
-    document.getElementById('resultStep').classList.remove('hidden');
-    document.getElementById('scoreDisplay').textContent = `${res.score} / ${res.totalMarks}`;
-    document.getElementById('scoreDetail').textContent = `${res.totalQuestions} questions answered`;
+      if (!res.success) {
+        alert('Error submitting exam: ' + (res.error || 'unknown error'));
+        return;
+      }
+
+      document.getElementById('examStep').classList.add('hidden');
+      document.getElementById('resultStep').classList.remove('hidden');
+      document.getElementById('scoreDisplay').textContent = `${res.score} / ${res.totalMarks}`;
+      document.getElementById('scoreDetail').textContent = `${res.totalQuestions} questions answered`;
+    } catch (err) {
+      showLoading(false);
+      alert('Connection error while submitting: ' + err.message);
+    }
   }
 </script>
 </body>
