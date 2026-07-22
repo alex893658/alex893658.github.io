@@ -133,8 +133,10 @@
       <button class="tab" data-tab="payroll">Payroll</button>
       <button class="tab" data-tab="staff">Staff</button>
       <button class="tab" data-tab="fees">School Fees</button>
+      <button class="tab" data-tab="feeitems">Fee Structure</button>
       <button class="tab" data-tab="expenses">Expenses</button>
       <button class="tab" data-tab="budgets">Budgets</button>
+      <button class="tab" data-tab="settings">Settings</button>
     </div>
 
     <!-- OVERVIEW -->
@@ -226,32 +228,79 @@
           </div>
           <div class="row2">
             <div class="field"><label>Method</label><select id="feeMethod"><option>Cash</option><option>Bank Transfer</option><option>POS</option></select></div>
-            <div class="field"><label>Receipt No.</label><input id="feeReceipt"></div>
+            <div class="field"><label>Fee Item</label><select id="feeItemSelect"><option value="General Payment">General Payment</option></select></div>
           </div>
           <button class="btn" id="addFeeBtn">Record Payment</button>
           <div class="status" id="feeMsg"></div>
           <hr style="margin:24px 0;border:none;border-top:1px solid var(--line)">
-          <h2 style="margin-bottom:14px">Add Student Fee Record</h2>
+          <h2 style="margin-bottom:14px">Students</h2>
+          <p style="color:#5A5D68;font-size:0.9rem;margin-bottom:12px">Students are pulled automatically from the main school portal. Use Sync if a new student isn't showing up yet.</p>
+          <button class="btn secondary" id="syncStudentsBtn">Sync Students from Portal</button>
+          <div class="status" id="syncMsg"></div>
+          <hr style="margin:24px 0;border:none;border-top:1px solid var(--line)">
+          <h3 style="font-size:0.95rem;margin-bottom:10px">Add Student Manually</h3>
           <div class="field"><label>Admission No.</label><input id="newAdmNo"></div>
           <div class="field"><label>Full Name</label><input id="newStuName"></div>
-          <div class="row2">
-            <div class="field"><label>Class</label><input id="newStuClass"></div>
-            <div class="field"><label>Term Fees (₦)</label><input type="number" id="newTermFees"></div>
-          </div>
+          <div class="field"><label>Class</label><input id="newStuClass"></div>
           <button class="btn secondary" id="addStudentBtn">Add Student</button>
           <div class="status" id="studentMsg"></div>
         </div>
         <div>
           <h2>Student Balances</h2>
           <div class="table-wrap"><table>
-            <thead><tr><th>Adm No.</th><th>Name</th><th>Class</th><th>Paid</th><th>Balance</th></tr></thead>
+            <thead><tr><th>Adm No.</th><th>Name</th><th>Class</th><th>Owed</th><th>Paid</th><th>Balance</th></tr></thead>
             <tbody id="studentsTable"></tbody>
           </table></div>
           <h2 style="margin-top:24px">Payment History</h2>
           <div class="table-wrap"><table>
-            <thead><tr><th>Student</th><th>Amount</th><th>Term</th><th>Date</th></tr></thead>
+            <thead><tr><th>Student</th><th>Amount</th><th>Fee Item</th><th>Receipt</th><th>Date</th></tr></thead>
             <tbody id="feePaymentsTable"></tbody>
           </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEE STRUCTURE -->
+    <div class="panel" id="panel-feeitems">
+      <div class="section-split">
+        <div>
+          <h2>Add Fee Item</h2>
+          <p style="color:#5A5D68;font-size:0.9rem;margin-bottom:12px">e.g. Tuition, Uniform, Books, Exam Fee. Set "Class" to "All" to apply it school-wide, or a specific class name (must match exactly how it appears in the portal, e.g. "JSS2").</p>
+          <div class="field"><label>Fee Name</label><input id="fiName" placeholder="Tuition"></div>
+          <div class="row2">
+            <div class="field"><label>Amount (₦)</label><input type="number" id="fiAmount"></div>
+            <div class="field"><label>Class</label><input id="fiClass" placeholder="All or e.g. JSS2"></div>
+          </div>
+          <div class="field"><label>Term</label>
+            <select id="fiTerm">
+              <option>All Terms</option><option>First Term</option><option>Second Term</option><option>Third Term</option>
+            </select>
+          </div>
+          <button class="btn" id="addFeeItemBtn">Add Fee Item</button>
+          <div class="status" id="feeItemMsg"></div>
+        </div>
+        <div>
+          <h2>Current Fee Items</h2>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Name</th><th>Amount</th><th>Class</th><th>Term</th><th>Status</th><th></th></tr></thead>
+            <tbody id="feeItemsTable"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="section-split">
+        <div>
+          <h2>Payment Details Shown to Students</h2>
+          <p style="color:#5A5D68;font-size:0.9rem;margin-bottom:12px">This is the account information students and parents will see on the portal when paying fees.</p>
+          <div class="field"><label>Bank Name</label><input id="setBankName"></div>
+          <div class="field"><label>Account Name</label><input id="setAccountName"></div>
+          <div class="field"><label>Account Number</label><input id="setAccountNumber"></div>
+          <div class="field"><label>Instructions</label><textarea id="setInstructions" placeholder="e.g. Use your child's admission number as payment reference."></textarea></div>
+          <button class="btn" id="saveSettingsBtn">Save Payment Details</button>
+          <div class="status" id="settingsMsg"></div>
         </div>
       </div>
     </div>
@@ -376,7 +425,7 @@ document.querySelectorAll('.tab').forEach(t=>{
 });
 
 async function loadAll(){
-  await Promise.all([loadDashboard(), loadStaff(), loadPayroll(), loadStudents(), loadFeePayments(), loadExpenses(), loadBudgets()]);
+  await Promise.all([loadDashboard(), loadStaff(), loadPayroll(), loadFeeItems(), loadStudents(), loadFeePayments(), loadExpenses(), loadBudgets(), loadSettings()]);
 }
 
 async function loadDashboard(){
@@ -468,19 +517,98 @@ async function loadStudents(){
   if(!data.success) return;
   const students = data.students || [];
   document.getElementById('studentsTable').innerHTML = students.map(s=>
-    `<tr><td>${s.admissionNo}</td><td>${s.fullName}</td><td>${s.studentClass}</td><td>${naira(s.totalPaid)}</td><td>${naira(s.balance)}</td></tr>`
-  ).join('') || '<tr><td colspan="5" class="empty">No students yet</td></tr>';
+    `<tr><td>${s.admissionNo}</td><td>${s.fullName}</td><td>${s.studentClass}</td><td>${naira(s.totalOwed)}</td><td>${naira(s.totalPaid)}</td><td>${naira(s.balance)}</td></tr>`
+  ).join('') || '<tr><td colspan="6" class="empty">No students yet — try Sync Students from Portal</td></tr>';
   document.getElementById('feeStudent').innerHTML = students.map(s=>
     `<option value="${s.admissionNo}">${s.fullName} (${s.admissionNo}) — owes ${naira(s.balance)}</option>`
   ).join('');
 }
 
+document.getElementById('syncStudentsBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('syncMsg');
+  msg.className = 'status'; msg.textContent = 'Syncing...';
+  const data = await api({action:'syncStudentsFromPortal'}, 'POST');
+  msg.className = data.success ? 'status ok' : 'status err';
+  msg.textContent = data.message;
+  if(data.success) loadStudents();
+});
+
+async function loadFeeItems(){
+  const data = await api({action:'listFeeItems'});
+  if(!data.success) return;
+  const items = data.feeItems || [];
+  document.getElementById('feeItemsTable').innerHTML = items.map(i=>`
+    <tr>
+      <td>${i.name}</td><td>${naira(i.amount)}</td><td>${i.className}</td><td>${i.term}</td>
+      <td>${badge(i.status)}</td>
+      <td>
+        <button class="btn small secondary" onclick="toggleFeeItem('${i.feeItemId}','${i.status}')">${String(i.status).toLowerCase()==='active'?'Deactivate':'Activate'}</button>
+        <button class="btn small secondary" onclick="removeFeeItem('${i.feeItemId}')">Delete</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="6" class="empty">No fee items yet</td></tr>';
+
+  document.getElementById('feeItemSelect').innerHTML =
+    '<option value="General Payment">General Payment</option>' +
+    items.map(i=>`<option value="${i.name}">${i.name}</option>`).join('');
+}
+
+window.toggleFeeItem = async (feeItemId, currentStatus)=>{
+  const newStatus = String(currentStatus).toLowerCase()==='active' ? 'inactive' : 'active';
+  const data = await api({action:'updateFeeItem', feeItemId, status:newStatus}, 'POST');
+  if(data.success){ loadFeeItems(); loadStudents(); loadDashboard(); }
+};
+
+window.removeFeeItem = async (feeItemId)=>{
+  const data = await api({action:'deleteFeeItem', feeItemId}, 'POST');
+  if(data.success){ loadFeeItems(); loadStudents(); loadDashboard(); }
+};
+
+document.getElementById('addFeeItemBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('feeItemMsg');
+  const data = await api({
+    action:'addFeeItem',
+    name: document.getElementById('fiName').value.trim(),
+    amount: document.getElementById('fiAmount').value,
+    className: document.getElementById('fiClass').value.trim() || 'All',
+    term: document.getElementById('fiTerm').value
+  }, 'POST');
+  msg.className = data.success ? 'status ok' : 'status err';
+  msg.textContent = data.message;
+  if(data.success){
+    ['fiName','fiAmount','fiClass'].forEach(id=>document.getElementById(id).value='');
+    loadFeeItems(); loadStudents(); loadDashboard();
+  }
+});
+
+async function loadSettings(){
+  const data = await api({action:'getPaymentSettings'});
+  if(!data.success) return;
+  const s = data.settings || {};
+  document.getElementById('setBankName').value = s.bankName || '';
+  document.getElementById('setAccountName').value = s.accountName || '';
+  document.getElementById('setAccountNumber').value = s.accountNumber || '';
+  document.getElementById('setInstructions').value = s.instructions || '';
+}
+
+document.getElementById('saveSettingsBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('settingsMsg');
+  const data = await api({
+    action:'setPaymentSettings',
+    bankName: document.getElementById('setBankName').value.trim(),
+    accountName: document.getElementById('setAccountName').value.trim(),
+    accountNumber: document.getElementById('setAccountNumber').value.trim(),
+    instructions: document.getElementById('setInstructions').value.trim()
+  }, 'POST');
+  msg.className = data.success ? 'status ok' : 'status err';
+  msg.textContent = data.message;
+});
+
 async function loadFeePayments(){
   const data = await api({action:'listFeePayments'});
   if(!data.success) return;
   document.getElementById('feePaymentsTable').innerHTML = (data.payments||[]).map(p=>
-    `<tr><td>${p.studentName}</td><td>${naira(p.amount)}</td><td>${p.term}</td><td>${p.date}</td></tr>`
-  ).join('') || '<tr><td colspan="4" class="empty">No payments yet</td></tr>';
+    `<tr><td>${p.studentName}</td><td>${naira(p.amount)}</td><td>${p.feeItem||'—'}</td><td>${p.receiptNo||'—'}</td><td>${p.date}</td></tr>`
+  ).join('') || '<tr><td colspan="5" class="empty">No payments yet</td></tr>';
 }
 
 document.getElementById('addFeeBtn').addEventListener('click', async ()=>{
@@ -491,7 +619,7 @@ document.getElementById('addFeeBtn').addEventListener('click', async ()=>{
     amount: document.getElementById('feeAmount').value,
     term: document.getElementById('feeTerm').value,
     method: document.getElementById('feeMethod').value,
-    receiptNo: document.getElementById('feeReceipt').value
+    feeItem: document.getElementById('feeItemSelect').value
   }, 'POST');
   msg.className = data.success ? 'status ok' : 'status err';
   msg.textContent = data.message;
@@ -504,13 +632,12 @@ document.getElementById('addStudentBtn').addEventListener('click', async ()=>{
     action:'addStudent',
     admissionNo: document.getElementById('newAdmNo').value.trim(),
     fullName: document.getElementById('newStuName').value.trim(),
-    studentClass: document.getElementById('newStuClass').value.trim(),
-    termFees: document.getElementById('newTermFees').value
+    studentClass: document.getElementById('newStuClass').value.trim()
   }, 'POST');
   msg.className = data.success ? 'status ok' : 'status err';
   msg.textContent = data.message;
   if(data.success){
-    ['newAdmNo','newStuName','newStuClass','newTermFees'].forEach(id=>document.getElementById(id).value='');
+    ['newAdmNo','newStuName','newStuClass'].forEach(id=>document.getElementById(id).value='');
     loadStudents();
   }
 });
