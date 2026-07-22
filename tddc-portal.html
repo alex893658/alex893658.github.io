@@ -87,6 +87,14 @@ tr:last-child td{border-bottom:none;}
 .score-input:focus{outline:2px solid var(--gold);outline-offset:1px;}
 .sheet-actions{display:flex;justify-content:space-between;align-items:center;margin-top:16px;flex-wrap:wrap;gap:10px;}
 .sheet-status{font-size:0.85rem;color:var(--green-deep);font-weight:600;}
+.finance-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+@media(max-width:600px){.finance-summary{grid-template-columns:1fr;}}
+.finance-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;}
+.finance-card .lbl{font-size:0.75rem;font-weight:600;color:#5A5D68;text-transform:uppercase;}
+.finance-card .amt{font-family:'Fraunces',serif;font-size:1.3rem;color:var(--navy);margin-top:4px;}
+.finance-card.warn .amt{color:var(--flame);}
+.badge-paid{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#E6F5EA;color:var(--green-deep);}
+.badge-pending{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#FFF3E0;color:#B36B00;}
 </style>
 </head>
 <body>
@@ -104,7 +112,7 @@ tr:last-child td{border-bottom:none;}
 <div class="intro">
 <img src="/tddc-logo.png" alt="TDDC crest">
 <h1>Student &amp; Staff Portal</h1>
-<p>Log in to view results and class notes.</p>
+<p>Log in to view results, class notes, school fees, and staff payslips.</p>
 </div>
 <div class="tabs">
 <div class="tab active" data-tab="student">Student</div>
@@ -152,6 +160,7 @@ tr:last-child td{border-bottom:none;}
 <div class="subtabs">
 <div class="subtab active" data-sub="results" data-owner="student">Results</div>
 <div class="subtab" data-sub="notes" data-owner="student">Note Bank</div>
+<div class="subtab" data-sub="fees" data-owner="student">School Fees</div>
 </div>
 <div class="subpanel active" id="student-results">
 <div class="field" style="max-width:220px;">
@@ -167,6 +176,9 @@ tr:last-child td{border-bottom:none;}
 </div>
 <div class="subpanel" id="student-notes">
 <div id="studentNotesArea" class="loading">Loading notes...</div>
+</div>
+<div class="subpanel" id="student-fees">
+<div id="studentFeesArea" class="loading">Loading fee information...</div>
 </div>
 </div>
 
@@ -184,6 +196,7 @@ tr:last-child td{border-bottom:none;}
 <div class="subtab" data-sub="viewnotes" data-owner="teacher">Class Notes</div>
 <div class="subtab" data-sub="classlist" data-owner="teacher">Class List</div>
 <div class="subtab" data-sub="classsheet" data-owner="teacher">Class Sheet</div>
+<div class="subtab" data-sub="payslips" data-owner="teacher">My Payslips</div>
 </div>
 <div class="subpanel active" id="teacher-addnote">
 <div class="card">
@@ -230,11 +243,16 @@ tr:last-child td{border-bottom:none;}
 <button class="btn secondary" id="loadClassSheetBtn" style="max-width:200px;margin-bottom:18px;">Load Class Sheet</button>
 <div id="classSheetArea"></div>
 </div>
+<div class="subpanel" id="teacher-payslips">
+<div id="staffPayslipsArea" class="loading">Loading payslips...</div>
+</div>
 </div>
 </main>
 <script>
 // ==== SET THIS to your Apps Script Web App URL (must end in /exec) ====
 const API_URL = "https://script.google.com/macros/s/AKfycbzpVG8hHPPBt344_B9AcKSWSYBJGCcYWQOSnZphbByNETCBC6jZkSKm2PkY8tYz_WuY/exec";
+// ==== SET THIS to your Finance Apps Script Web App URL (must end in /exec) ====
+const FINANCE_API = "https://script.google.com/macros/s/AKfycbwccxwVk5m2pitZhhZ5xxB1rw7SjHJhA03Iw8fLoS29L3N1SFPgUz0fMxUEjDhz9Uelrw/exec";
 
 let currentStudent = null;
 let currentTeacher = null;
@@ -258,6 +276,8 @@ document.querySelectorAll('.subtab').forEach(st=>{
     dash.querySelectorAll('.subpanel').forEach(p=>p.classList.remove('active'));
     const idPrefix = owner === 'student' ? 'student-' : 'teacher-';
     document.getElementById(idPrefix+st.dataset.sub).classList.add('active');
+    if(st.dataset.sub === 'fees' && currentStudent) loadStudentFees();
+    if(st.dataset.sub === 'payslips' && currentTeacher) loadStaffPayslips();
   });
 });
 
@@ -278,6 +298,14 @@ async function apiCall(params){
   return res.json();
 }
 
+async function financeCall(params){
+  const url = FINANCE_API + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url);
+  return res.json();
+}
+
+function naira(n){ return '₦' + Number(n||0).toLocaleString('en-NG'); }
+
 
 
 document.getElementById('studentLoginBtn').addEventListener('click', async ()=>{
@@ -294,6 +322,7 @@ document.getElementById('studentLoginBtn').addEventListener('click', async ()=>{
       document.getElementById('studentDash').classList.add('active');
       document.getElementById('studentWelcome').textContent = 'Welcome, ' + data.name;
       document.getElementById('studentClassLine').textContent = data.studentClass;
+      currentStudent.admissionNo = admissionNo;
       loadStudentNotes();
     } else {
       msg.style.color='var(--flame)'; msg.textContent = data.message;
@@ -319,6 +348,7 @@ document.getElementById('teacherLoginBtn').addEventListener('click', async ()=>{
       document.getElementById('viewClassInput').value = data.assignedClass || '';
       document.getElementById('listClassInput').value = data.assignedClass || '';
       document.getElementById('sheetClassInput').value = data.assignedClass || '';
+      currentTeacher.staffId = staffId;
     } else {
       msg.style.color='var(--flame)'; msg.textContent = data.message;
     }
@@ -345,6 +375,69 @@ async function loadStudentNotes(){
   area.className='loading'; area.textContent='Loading notes...';
   const data = await apiCall({action:'getNotes', className: currentStudent.className});
   renderNotes(data, area);
+}
+
+async function loadStudentFees(){
+  const area = document.getElementById('studentFeesArea');
+  area.className='loading'; area.textContent='Loading fee information...';
+  try{
+    const data = await financeCall({action:'studentFees', admissionNo: currentStudent.admissionNo});
+    if(!data.success){
+      area.className='empty'; area.textContent='Could not load fee records.';
+      return;
+    }
+    if(!data.student){
+      area.className='empty';
+      area.textContent = data.message || 'No fee record yet. Please contact the bursar.';
+      return;
+    }
+    const s = data.student;
+    let html = `
+      <div class="finance-summary">
+        <div class="finance-card"><div class="lbl">Term Fees</div><div class="amt">${naira(s.termFees)}</div></div>
+        <div class="finance-card"><div class="lbl">Total Paid</div><div class="amt">${naira(s.totalPaid)}</div></div>
+        <div class="finance-card ${Number(s.balance)>0?'warn':''}"><div class="lbl">Balance</div><div class="amt">${naira(s.balance)}</div></div>
+      </div>`;
+    if(data.payments && data.payments.length){
+      html += '<table><thead><tr><th>Date</th><th>Amount</th><th>Term</th><th>Method</th><th>Receipt</th></tr></thead><tbody>';
+      data.payments.forEach(p=>{
+        html += `<tr><td>${p.date}</td><td>${naira(p.amount)}</td><td>${p.term}</td><td>${p.method}</td><td>${p.receiptNo||'—'}</td></tr>`;
+      });
+      html += '</tbody></table>';
+    } else {
+      html += '<p class="empty">No payments recorded yet.</p>';
+    }
+    area.className=''; area.innerHTML = html;
+  } catch(e){
+    area.className='empty'; area.textContent='Finance service unavailable. Contact the school bursar.';
+  }
+}
+
+async function loadStaffPayslips(){
+  const area = document.getElementById('staffPayslipsArea');
+  area.className='loading'; area.textContent='Loading payslips...';
+  try{
+    const data = await financeCall({action:'staffPayslips', staffId: currentTeacher.staffId});
+    if(!data.success || !data.staff){
+      area.className='empty'; area.textContent = data.message || 'No payroll records found for your staff ID.';
+      return;
+    }
+    let html = `
+      <p style="margin-bottom:14px;color:#5A5D68;font-size:0.9rem">${data.staff.role} · ${data.staff.department||'General'} · YTD earnings: <strong>${naira(data.ytdEarnings)}</strong></p>`;
+    if(data.payslips && data.payslips.length){
+      html += '<table><thead><tr><th>Period</th><th>Base</th><th>Allowances</th><th>Deductions</th><th>Net Pay</th><th>Status</th></tr></thead><tbody>';
+      data.payslips.forEach(p=>{
+        const badge = String(p.status).toLowerCase()==='paid' ? 'badge-paid' : 'badge-pending';
+        html += `<tr><td>${p.month} ${p.year}</td><td>${naira(p.baseSalary)}</td><td>${naira(p.allowances)}</td><td>${naira(p.deductions)}</td><td><strong>${naira(p.netPay)}</strong></td><td><span class="${badge}">${p.status}</span></td></tr>`;
+      });
+      html += '</tbody></table>';
+    } else {
+      html += '<p class="empty">No payslips yet. Contact the bursar if you expect payment records.</p>';
+    }
+    area.className=''; area.innerHTML = html;
+  } catch(e){
+    area.className='empty'; area.textContent='Finance service unavailable. Contact the school bursar.';
+  }
 }
 
 function renderNotes(data, area){
