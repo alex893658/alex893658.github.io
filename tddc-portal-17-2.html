@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal — TDDC Schools &amp; College</title>
+<link rel="icon" href="/tddc-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1B2350; --green:#2E9E44; --green-deep:#1F7A34;
+  --flame:#E2492E; --gold:#D4A94C; --cream:#FBF8F2;
+  --ink:#1A1B1E; --paper:#FFFFFF; --line:rgba(27,35,80,0.12); --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);line-height:1.6;}
+h1,h2,h3{font-family:'Fraunces',serif;color:var(--navy);}
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+header{background:var(--navy);padding:14px 24px;}
+nav{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand img{width:36px;}
+.brand span{color:#fff;font-family:'Fraunces',serif;font-weight:700;}
+nav a.back{color:#C9CDE8;font-size:0.88rem;font-weight:500;}
+main{max-width:640px;margin:0 auto;padding:50px 24px 80px;}
+.intro{text-align:center;margin-bottom:30px;}
+.intro img{width:70px;margin:0 auto 14px;}
+.intro h1{font-size:1.7rem;margin-bottom:8px;}
+.intro p{color:#5A5D68;font-size:0.95rem;}
+.tabs{display:flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px;margin-bottom:26px;}
+.tab{flex:1;text-align:center;padding:11px;border-radius:999px;font-weight:600;font-size:0.92rem;color:#5A5D68;cursor:pointer;transition:all .15s ease;}
+.tab.active{background:var(--green);color:#fff;}
+.panel{display:none;}
+.panel.active{display:block;}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:0.84rem;font-weight:600;color:var(--navy);margin-bottom:6px;}
+.field input, .field select, .field textarea{
+  width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:9px;
+  font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--cream);
+}
+.field textarea{min-height:90px;resize:vertical;}
+.field input:focus, .field select:focus, .field textarea:focus{outline:2px solid var(--green);outline-offset:1px;}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:13px;border-radius:999px;font-weight:600;font-size:0.95rem;border:none;cursor:pointer;
+  background:var(--flame);color:#fff;transition:transform .15s ease;
+}
+.btn:hover{transform:translateY(-1px);}
+.btn.secondary{background:var(--navy);}
+.login-msg{font-size:0.88rem;margin-top:12px;text-align:center;}
+/* Dashboard */
+.dash{display:none;}
+.dash.active{display:block;}
+.dash-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;}
+.dash-head h2{font-size:1.3rem;}
+.dash-head p{color:#5A5D68;font-size:0.88rem;}
+.logout{font-size:0.85rem;font-weight:600;color:var(--flame);cursor:pointer;}
+.subtabs{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.subtab{padding:9px 16px;border-radius:999px;font-size:0.86rem;font-weight:600;background:#fff;border:1px solid var(--line);color:var(--navy);cursor:pointer;}
+.subtab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.subpanel{display:none;}
+.subpanel.active{display:block;}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);}
+th,td{padding:10px 12px;text-align:left;font-size:0.86rem;border-bottom:1px solid var(--line);}
+th{background:var(--cream);color:var(--navy);font-weight:700;}
+tr:last-child td{border-bottom:none;}
+.note-item{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:12px;}
+.note-item h4{font-size:0.98rem;color:var(--navy);margin-bottom:4px;}
+.note-item .meta{font-size:0.78rem;color:var(--green-deep);font-weight:600;margin-bottom:6px;}
+.note-item p{font-size:0.88rem;color:#5A5D68;}
+.note-item a.file{font-size:0.85rem;font-weight:600;color:var(--flame);display:inline-block;margin-top:8px;}
+.empty{color:#8A8D97;font-size:0.9rem;text-align:center;padding:26px 0;}
+.loading{color:#8A8D97;font-size:0.9rem;text-align:center;padding:16px 0;}
+/* Class sheet grid */
+.sheet-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff;}
+.sheet-table{width:100%;border-collapse:collapse;font-size:0.85rem;min-width:520px;}
+.sheet-table th{background:var(--navy);color:#fff;padding:10px 8px;text-align:center;white-space:nowrap;}
+.sheet-table th.name-th{text-align:left;padding-left:14px;}
+.sheet-table td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:center;}
+.sheet-table td.name-td{text-align:left;padding-left:14px;font-weight:600;color:var(--navy);white-space:nowrap;}
+.sheet-table tr:nth-child(even){background:var(--cream);}
+.score-input{width:52px;text-align:center;padding:6px 3px;border:1px solid var(--line);border-radius:6px;font-family:'Inter';font-weight:600;font-size:0.85rem;}
+.score-input:focus{outline:2px solid var(--gold);outline-offset:1px;}
+.sheet-actions{display:flex;justify-content:space-between;align-items:center;margin-top:16px;flex-wrap:wrap;gap:10px;}
+.sheet-status{font-size:0.85rem;color:var(--green-deep);font-weight:600;}
+.finance-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+@media(max-width:600px){.finance-summary{grid-template-columns:1fr;}}
+.finance-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;}
+.finance-card .lbl{font-size:0.75rem;font-weight:600;color:#5A5D68;text-transform:uppercase;}
+.finance-card .amt{font-family:'Fraunces',serif;font-size:1.3rem;color:var(--navy);margin-top:4px;}
+.finance-card.warn .amt{color:var(--flame);}
+.badge-paid{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#E6F5EA;color:var(--green-deep);}
+.badge-pending{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#FFF3E0;color:#B36B00;}
+</style>
+</head>
+<body>
+<header>
+<nav>
+<div class="brand">
+<img src="/tddc-logo.png" alt="TDDC crest">
+<span>TDDC Portal</span>
+</div>
+<a href="index.html" class="back">← Back to website</a>
+</nav>
+</header>
+<main>
+<div id="loginView">
+<div class="intro">
+<img src="/tddc-logo.png" alt="TDDC crest">
+<h1>Student &amp; Staff Portal</h1>
+<p>Log in to view results, class notes, school fees, and staff payslips.</p>
+</div>
+<div class="tabs">
+<div class="tab active" data-tab="student">Student</div>
+<div class="tab" data-tab="teacher">Teacher</div>
+</div>
+<div class="panel active" id="studentPanel">
+<div class="card">
+<div class="field">
+<label for="admissionNo">Admission Number</label>
+<input id="admissionNo" placeholder="e.g. TDDC/2024/013">
+</div>
+<div class="field">
+<label for="studentPassword">Password</label>
+<input id="studentPassword" type="password" placeholder="Your password">
+</div>
+<button class="btn" id="studentLoginBtn">Log In</button>
+<p class="login-msg" id="studentLoginMsg"></p>
+</div>
+</div>
+<div class="panel" id="teacherPanel">
+<div class="card">
+<div class="field">
+<label for="staffId">Staff ID</label>
+<input id="staffId" placeholder="e.g. TDDC-STAFF-04">
+</div>
+<div class="field">
+<label for="teacherPassword">Password</label>
+<input id="teacherPassword" type="password" placeholder="Your password">
+</div>
+<button class="btn" id="teacherLoginBtn">Log In</button>
+<p class="login-msg" id="teacherLoginMsg"></p>
+</div>
+</div>
+</div>
+
+<!-- STUDENT DASHBOARD -->
+<div class="dash" id="studentDash">
+<div class="dash-head">
+<div>
+<h2 id="studentWelcome">Welcome</h2>
+<p id="studentClassLine"></p>
+</div>
+<span class="logout" data-logout>Log out</span>
+</div>
+<div class="subtabs">
+<div class="subtab active" data-sub="overview" data-owner="student">Overview</div>
+<div class="subtab" data-sub="results" data-owner="student">Results</div>
+<div class="subtab" data-sub="notes" data-owner="student">Note Bank</div>
+<div class="subtab" data-sub="fees" data-owner="student">School Fees</div>
+</div>
+<div class="subpanel active" id="student-overview">
+<div id="studentOverviewArea" class="loading">Loading overview...</div>
+</div>
+<div class="subpanel" id="student-results">
+<div class="field" style="max-width:220px;">
+<label for="termSelect">Term</label>
+<select id="termSelect">
+<option value="">All Terms</option>
+<option value="First Term">First Term</option>
+<option value="Second Term">Second Term</option>
+<option value="Third Term">Third Term</option>
+</select>
+</div>
+<div id="resultsArea" class="loading">Select a term to view results.</div>
+</div>
+<div class="subpanel" id="student-notes">
+<div id="studentNotesArea" class="loading">Loading notes...</div>
+</div>
+<div class="subpanel" id="student-fees">
+<div id="studentFeesArea" class="loading">Loading fee information...</div>
+</div>
+</div>
+
+<!-- TEACHER DASHBOARD -->
+<div class="dash" id="teacherDash">
+<div class="dash-head">
+<div>
+<h2 id="teacherWelcome">Welcome</h2>
+<p id="teacherClassLine"></p>
+</div>
+<span class="logout" data-logout>Log out</span>
+</div>
+<div class="subtabs">
+<div class="subtab active" data-sub="addnote" data-owner="teacher">Add a Note</div>
+<div class="subtab" data-sub="viewnotes" data-owner="teacher">Class Notes</div>
+<div class="subtab" data-sub="classlist" data-owner="teacher">Class List</div>
+<div class="subtab" data-sub="classsheet" data-owner="teacher">Class Sheet</div>
+<div class="subtab" data-sub="payslips" data-owner="teacher">My Payslips</div>
+</div>
+<div class="subpanel active" id="teacher-addnote">
+<div class="card">
+<div class="field"><label for="noteTitle">Note title</label><input id="noteTitle" placeholder="e.g. Mid-term revision, Basic Science"></div>
+<div class="field"><label for="noteClass">Class</label><input id="noteClass" placeholder="e.g. JSS 2"></div>
+<div class="field"><label for="noteSubject">Subject</label><input id="noteSubject" placeholder="e.g. Mathematics"></div>
+<div class="field"><label for="noteLink">Link to file (Google Drive link, optional)</label><input id="noteLink" placeholder="https://..."></div>
+<div class="field"><label for="noteDesc">Short description</label><textarea id="noteDesc" placeholder="What is this note about?"></textarea></div>
+<button class="btn secondary" id="addNoteBtn">Add to Note Bank</button>
+<p class="login-msg" id="addNoteMsg"></p>
+</div>
+</div>
+<div class="subpanel" id="teacher-viewnotes">
+<div class="field" style="max-width:260px;">
+<label for="viewClassInput">Class</label>
+<input id="viewClassInput" placeholder="e.g. JSS 2">
+</div>
+<button class="btn secondary" id="loadClassNotesBtn" style="max-width:200px;margin-bottom:18px;">View Notes</button>
+<div id="teacherNotesArea"></div>
+</div>
+<div class="subpanel" id="teacher-classlist">
+<div class="field" style="max-width:260px;">
+<label for="listClassInput">Class</label>
+<input id="listClassInput" placeholder="e.g. JSS 2">
+</div>
+<button class="btn secondary" id="loadClassListBtn" style="max-width:200px;margin-bottom:18px;">View Class List</button>
+<div id="classListArea"></div>
+</div>
+<div class="subpanel" id="teacher-classsheet">
+<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px;">
+<div class="field" style="max-width:200px;">
+<label for="sheetClassInput">Class</label>
+<input id="sheetClassInput" placeholder="e.g. JSS 2">
+</div>
+<div class="field" style="max-width:200px;">
+<label for="sheetTermInput">Term</label>
+<select id="sheetTermInput">
+<option value="First Term">First Term</option>
+<option value="Second Term">Second Term</option>
+<option value="Third Term">Third Term</option>
+</select>
+</div>
+</div>
+<button class="btn secondary" id="loadClassSheetBtn" style="max-width:200px;margin-bottom:18px;">Load Class Sheet</button>
+<div id="classSheetArea"></div>
+</div>
+<div class="subpanel" id="teacher-payslips">
+<div id="staffPayslipsArea" class="loading">Loading payslips...</div>
+</div>
+</div>
+</main>
+<script>
+// ==== SET THIS to your Apps Script Web App URL (must end in /exec) ====
+const API_URL = "https://script.google.com/macros/s/AKfycbzpVG8hHPPBt344_B9AcKSWSYBJGCcYWQOSnZphbByNETCBC6jZkSKm2PkY8tYz_WuY/exec";
+// ==== SET THIS to your Finance Apps Script Web App URL (must end in /exec) ====
+const FINANCE_API = "https://script.google.com/macros/s/AKfycbwccxwVk5m2pitZhhZ5xxB1rw7SjHJhA03Iw8fLoS29L3N1SFPgUz0fMxUEjDhz9Uelrw/exec";
+
+let currentStudent = null;
+let currentTeacher = null;
+let sheetSubjects = [];
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab+'Panel').classList.add('active');
+  });
+});
+
+document.querySelectorAll('.subtab').forEach(st=>{
+  st.addEventListener('click', ()=>{
+    const owner = st.dataset.owner;
+    document.querySelectorAll('.subtab[data-owner="'+owner+'"]').forEach(t=>t.classList.remove('active'));
+    st.classList.add('active');
+    const dash = owner === 'student' ? document.getElementById('studentDash') : document.getElementById('teacherDash');
+    dash.querySelectorAll('.subpanel').forEach(p=>p.classList.remove('active'));
+    const idPrefix = owner === 'student' ? 'student-' : 'teacher-';
+    document.getElementById(idPrefix+st.dataset.sub).classList.add('active');
+    if(st.dataset.sub === 'overview' && currentStudent) loadStudentOverview();
+    if(st.dataset.sub === 'fees' && currentStudent) loadStudentFees();
+    if(st.dataset.sub === 'notes' && currentStudent) loadStudentNotes();
+    if(st.dataset.sub === 'payslips' && currentTeacher) loadStaffPayslips();
+  });
+});
+
+document.querySelectorAll('[data-logout]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    currentStudent = null; currentTeacher = null;
+    document.getElementById('studentDash').classList.remove('active');
+    document.getElementById('teacherDash').classList.remove('active');
+    document.getElementById('loginView').style.display = 'block';
+    document.getElementById('studentPassword').value = '';
+    document.getElementById('teacherPassword').value = '';
+  });
+});
+
+async function apiCall(params){
+  const url = API_URL + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url);
+  return res.json();
+}
+
+async function financeCall(params){
+  const url = FINANCE_API + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url);
+  return res.json();
+}
+
+function naira(n){ return '₦' + Number(n||0).toLocaleString('en-NG'); }
+
+
+
+document.getElementById('studentLoginBtn').addEventListener('click', async ()=>{
+  const admissionNo = document.getElementById('admissionNo').value.trim();
+  const password = document.getElementById('studentPassword').value;
+  const msg = document.getElementById('studentLoginMsg');
+  if(!admissionNo || !password){ msg.style.color='var(--flame)'; msg.textContent='Please fill in both fields.'; return; }
+  msg.style.color='#5A5D68'; msg.textContent='Checking...';
+  try{
+    const data = await apiCall({action:'studentLogin', id: admissionNo, pin: password});
+    if(data.success){
+      currentStudent = data;
+      document.getElementById('loginView').style.display='none';
+      document.getElementById('studentDash').classList.add('active');
+      document.getElementById('studentWelcome').textContent = 'Welcome, ' + data.name;
+      document.getElementById('studentClassLine').textContent = data.studentClass;
+      currentStudent.admissionNo = admissionNo;
+      loadStudentOverview();
+    } else {
+      msg.style.color='var(--flame)'; msg.textContent = data.message;
+    }
+  } catch(e){ msg.style.color='var(--flame)'; msg.textContent='Could not connect. Please try again.'; }
+});
+
+document.getElementById('teacherLoginBtn').addEventListener('click', async ()=>{
+  const staffId = document.getElementById('staffId').value.trim();
+  const password = document.getElementById('teacherPassword').value;
+  const msg = document.getElementById('teacherLoginMsg');
+  if(!staffId || !password){ msg.style.color='var(--flame)'; msg.textContent='Please fill in both fields.'; return; }
+  msg.style.color='#5A5D68'; msg.textContent='Checking...';
+  try{
+    const data = await apiCall({action:'staffLogin', id: staffId, pin: password});
+    if(data.success){
+      currentTeacher = data;
+      document.getElementById('loginView').style.display='none';
+      document.getElementById('teacherDash').classList.add('active');
+      document.getElementById('teacherWelcome').textContent = 'Welcome, ' + data.name;
+      document.getElementById('teacherClassLine').textContent = 'Assigned class: ' + (data.assignedClass || '—');
+      document.getElementById('noteClass').value = data.assignedClass || '';
+      document.getElementById('viewClassInput').value = data.assignedClass || '';
+      document.getElementById('listClassInput').value = data.assignedClass || '';
+      document.getElementById('sheetClassInput').value = data.assignedClass || '';
+      currentTeacher.staffId = staffId;
+    } else {
+      msg.style.color='var(--flame)'; msg.textContent = data.message;
+    }
+  } catch(e){ msg.style.color='var(--flame)'; msg.textContent='Could not connect. Please try again.'; }
+});
+
+document.getElementById('termSelect').addEventListener('change', (e)=>{
+  const area = document.getElementById('resultsArea');
+  if(!currentStudent || !currentStudent.terms){ area.className='empty'; area.textContent='No results found.'; return; }
+  const terms = currentStudent.terms.filter(t => !e.target.value || t.term === e.target.value);
+  if(terms.length===0){ area.className='empty'; area.textContent='No results for this term.'; return; }
+  let html = '<table><tr><th>Subject</th><th>Score</th><th>Grade</th></tr>';
+  terms.forEach(t=>{
+    t.subjects.forEach(s=>{
+      html += `<tr><td>${s.subject}</td><td>${s.score}</td><td>${s.grade}</td></tr>`;
+    });
+  });
+  html += '</table>';
+  area.className=''; area.innerHTML = html;
+});
+
+async function loadStudentNotes(){
+  const area = document.getElementById('studentNotesArea');
+  area.className='loading'; area.textContent='Loading notes...';
+  const data = await apiCall({action:'getNotes', className: currentStudent.className});
+  renderNotes(data, area);
+}
+
+let lastFeesData = null;
+
+async function loadStudentFees(){
+  const area = document.getElementById('studentFeesArea');
+  area.className='loading'; area.textContent='Loading fee information...';
+  try{
+    const data = await financeCall({action:'studentFees', admissionNo: currentStudent.admissionNo});
+    lastFeesData = data;
+    if(!data.success){
+      area.className='empty'; area.textContent='Could not load fee records.';
+      return;
+    }
+    if(!data.student){
+      area.className='empty';
+      area.textContent = data.message || 'No fee record yet. Please contact the bursar.';
+      return;
+    }
+    const s = data.student;
+    let html = `
+      <div class="finance-summary">
+        <div class="finance-card"><div class="lbl">Total Owed</div><div class="amt">${naira(s.termFees)}</div></div>
+        <div class="finance-card"><div class="lbl">Total Paid</div><div class="amt">${naira(s.totalPaid)}</div></div>
+        <div class="finance-card ${Number(s.balance)>0?'warn':''}"><div class="lbl">Balance</div><div class="amt">${naira(s.balance)}</div></div>
+      </div>`;
+
+    if(data.items && data.items.length){
+      html += '<h3 style="font-size:0.95rem;margin:18px 0 10px">Fee Breakdown</h3>';
+      html += '<table><thead><tr><th>Fee</th><th>Term</th><th>Amount</th></tr></thead><tbody>';
+      data.items.forEach(i=>{
+        html += `<tr><td>${i.name}</td><td>${i.term}</td><td>${naira(i.amount)}</td></tr>`;
+      });
+      html += '</tbody></table>';
+    }
+
+    const ps = data.paymentSettings || {};
+    if(ps.accountNumber){
+      html += `
+        <h3 style="font-size:0.95rem;margin:18px 0 10px">Where to Pay</h3>
+        <div class="finance-card" style="max-width:360px">
+          <div class="lbl">Bank</div><div style="font-weight:700;margin-bottom:8px">${ps.bankName||'—'}</div>
+          <div class="lbl">Account Name</div><div style="font-weight:700;margin-bottom:8px">${ps.accountName||'—'}</div>
+          <div class="lbl">Account Number</div><div style="font-weight:700;margin-bottom:8px">${ps.accountNumber||'—'}</div>
+          ${ps.instructions ? `<p style="font-size:0.82rem;color:#5A5D68;margin-top:6px">${ps.instructions}</p>` : ''}
+        </div>`;
+    }
+
+    html += '<h3 style="font-size:0.95rem;margin:18px 0 10px">Payment History</h3>';
+    if(data.payments && data.payments.length){
+      html += '<table><thead><tr><th>Date</th><th>Amount</th><th>Fee Item</th><th>Method</th><th>Receipt</th></tr></thead><tbody>';
+      data.payments.forEach(p=>{
+        html += `<tr><td>${p.date}</td><td>${naira(p.amount)}</td><td>${p.feeItem||p.term||'—'}</td><td>${p.method}</td><td>${p.receiptNo ? `<a href="#" onclick="printReceipt('${p.receiptNo}');return false;">${p.receiptNo}</a>` : '—'}</td></tr>`;
+      });
+      html += '</tbody></table>';
+    } else {
+      html += '<p class="empty">No payments recorded yet.</p>';
+    }
+    area.className=''; area.innerHTML = html;
+  } catch(e){
+    area.className='empty'; area.textContent='Finance service unavailable. Contact the school bursar.';
+  }
+}
+
+window.printReceipt = (receiptNo)=>{
+  if(!lastFeesData || !lastFeesData.payments) return;
+  const p = lastFeesData.payments.find(x=>x.receiptNo===receiptNo);
+  if(!p) return;
+  const s = lastFeesData.student || {};
+  const w = window.open('', '_blank', 'width=420,height=560');
+  w.document.write(`
+    <html><head><title>Receipt ${receiptNo}</title>
+    <style>
+      body{font-family:Arial,sans-serif;padding:24px;color:#1B2350;}
+      h2{margin-bottom:0;}
+      .line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;}
+      .total{font-weight:bold;font-size:1.1rem;margin-top:12px;}
+    </style></head><body>
+      <h2>TDDC Schools &amp; College</h2>
+      <p style="color:#666">Official Fee Payment Receipt</p>
+      <div class="line"><span>Receipt No.</span><span>${p.receiptNo}</span></div>
+      <div class="line"><span>Student</span><span>${p.studentName || currentStudent.name}</span></div>
+      <div class="line"><span>Admission No.</span><span>${p.admissionNo || currentStudent.admissionNo}</span></div>
+      <div class="line"><span>Fee Item</span><span>${p.feeItem||p.term||'—'}</span></div>
+      <div class="line"><span>Method</span><span>${p.method}</span></div>
+      <div class="line"><span>Date</span><span>${p.date}</span></div>
+      <div class="line total"><span>Amount Paid</span><span>${naira(p.amount)}</span></div>
+      <p style="margin-top:24px;color:#999;font-size:0.8rem">Generated from the TDDC parent portal.</p>
+      <script>window.print()<\/script>
+    </body></html>`);
+  w.document.close();
+};
+
+async function loadStudentOverview(){
+  const area = document.getElementById('studentOverviewArea');
+  area.className='loading'; area.textContent='Loading overview...';
+  try{
+    const [notesData, feesData] = await Promise.all([
+      apiCall({action:'getNotes', className: currentStudent.className}),
+      financeCall({action:'studentFees', admissionNo: currentStudent.admissionNo})
+    ]);
+
+    let balanceHtml = '<p class="empty">Fee information unavailable.</p>';
+    if(feesData && feesData.success && feesData.student){
+      const s = feesData.student;
+      balanceHtml = `
+        <div class="finance-summary">
+          <div class="finance-card"><div class="lbl">Total Owed</div><div class="amt">${naira(s.termFees)}</div></div>
+          <div class="finance-card"><div class="lbl">Total Paid</div><div class="amt">${naira(s.totalPaid)}</div></div>
+          <div class="finance-card ${Number(s.balance)>0?'warn':''}"><div class="lbl">Balance</div><div class="amt">${naira(s.balance)}</div></div>
+        </div>`;
+    } else if(feesData && feesData.message){
+      balanceHtml = `<p class="empty">${feesData.message}</p>`;
+    }
+
+    let noteHtml = '<p class="empty">No notes posted for your class yet.</p>';
+    if(notesData && notesData.success && notesData.notes && notesData.notes.length){
+      const n = notesData.notes[0];
+      noteHtml = `<div class="finance-card"><div class="lbl">${n.subject} · ${n.date}</div><div style="font-weight:700;margin-top:4px">${n.title}</div></div>`;
+    }
+
+    area.className = '';
+    area.innerHTML = `
+      <h3 style="font-size:0.95rem;margin-bottom:10px">School Fees</h3>
+      ${balanceHtml}
+      <h3 style="font-size:0.95rem;margin:20px 0 10px">Latest Note</h3>
+      ${noteHtml}
+    `;
+  } catch(e){
+    area.className='empty'; area.textContent='Could not load overview right now.';
+  }
+}
+
+async function loadStaffPayslips(){
+  const area = document.getElementById('staffPayslipsArea');
+  area.className='loading'; area.textContent='Loading payslips...';
+  try{
+    const data = await financeCall({action:'staffPayslips', staffId: currentTeacher.staffId});
+    if(!data.success || !data.staff){
+      area.className='empty'; area.textContent = data.message || 'No payroll records found for your staff ID.';
+      return;
+    }
+    let html = `
+      <p style="margin-bottom:14px;color:#5A5D68;font-size:0.9rem">${data.staff.role} · ${data.staff.department||'General'} · YTD earnings: <strong>${naira(data.ytdEarnings)}</strong></p>`;
+    if(data.payslips && data.payslips.length){
+      html += '<table><thead><tr><th>Period</th><th>Base</th><th>Allowances</th><th>Deductions</th><th>Net Pay</th><th>Status</th></tr></thead><tbody>';
+      data.payslips.forEach(p=>{
+        const badge = String(p.status).toLowerCase()==='paid' ? 'badge-paid' : 'badge-pending';
+        html += `<tr><td>${p.month} ${p.year}</td><td>${naira(p.baseSalary)}</td><td>${naira(p.allowances)}</td><td>${naira(p.deductions)}</td><td><strong>${naira(p.netPay)}</strong></td><td><span class="${badge}">${p.status}</span></td></tr>`;
+      });
+      html += '</tbody></table>';
+    } else {
+      html += '<p class="empty">No payslips yet. Contact the bursar if you expect payment records.</p>';
+    }
+    area.className=''; area.innerHTML = html;
+  } catch(e){
+    area.className='empty'; area.textContent='Finance service unavailable. Contact the school bursar.';
+  }
+}
+
+function renderNotes(data, area){
+  if(!data.success || !data.notes || data.notes.length===0){
+    area.className='empty'; area.textContent='No notes uploaded for this class yet.'; return;
+  }
+  area.className='';
+  area.innerHTML = data.notes.map(n=>`
+    <div class="note-item">
+      <h4>${n.title}</h4>
+      <div class="meta">${n.subject || 'General'} · ${n.className}</div>
+      <p>${n.description || ''}</p>
+      ${n.fileLink ? `<a class="file" href="${n.fileLink}" target="_blank" rel="noopener">Open file →</a>` : ''}
+    </div>
+  `).join('');
+}
+
+document.getElementById('addNoteBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('addNoteMsg');
+  const title = document.getElementById('noteTitle').value.trim();
+  const className = document.getElementById('noteClass').value.trim();
+  if(!title || !className){ msg.style.color='var(--flame)'; msg.textContent='Title and class are required.'; return; }
+  msg.style.color='#5A5D68'; msg.textContent='Saving...';
+  const data = await apiCall({
+    action:'addNote', title, className,
+    subject: document.getElementById('noteSubject').value.trim(),
+    uploadedBy: currentTeacher.fullName,
+    fileLink: document.getElementById('noteLink').value.trim(),
+    description: document.getElementById('noteDesc').value.trim()
+  });
+  if(data.success){
+    msg.style.color='var(--green-deep)'; msg.textContent = data.message;
+    document.getElementById('noteTitle').value='';
+    document.getElementById('noteSubject').value='';
+    document.getElementById('noteLink').value='';
+    document.getElementById('noteDesc').value='';
+  } else {
+    msg.style.color='var(--flame)'; msg.textContent = data.message;
+  }
+});
+
+document.getElementById('loadClassNotesBtn').addEventListener('click', async ()=>{
+  const area = document.getElementById('teacherNotesArea');
+  const className = document.getElementById('viewClassInput').value.trim();
+  if(!className) return;
+  area.className='loading'; area.textContent='Loading...';
+  const data = await apiCall({action:'getNotes', className});
+  renderNotes(data, area);
+});
+
+document.getElementById('loadClassListBtn').addEventListener('click', async ()=>{
+  const area = document.getElementById('classListArea');
+  const className = document.getElementById('listClassInput').value.trim();
+  if(!className) return;
+  area.className='loading'; area.textContent='Loading...';
+  const data = await apiCall({action:'getClassSheet', className});
+  if(!data.success || !data.students || data.students.length===0){
+    area.className='empty'; area.textContent='No students found for this class.'; return;
+  }
+  let html = '<table><tr><th>Admission No.</th><th>Full Name</th></tr>';
+  data.students.forEach(s=>{ html += `<tr><td>${s.admissionNo}</td><td>${s.fullName}</td></tr>`; });
+  html += '</table>';
+  area.className=''; area.innerHTML = html;
+});
+
+// ==== CLASS SHEET (bulk result entry) ====
+document.getElementById('loadClassSheetBtn').addEventListener('click', async ()=>{
+  const area = document.getElementById('classSheetArea');
+  const className = document.getElementById('sheetClassInput').value.trim();
+  const term = document.getElementById('sheetTermInput').value;
+  if(!className){ return; }
+  area.className='loading'; area.textContent='Loading class sheet...';
+  try{
+    const data = await apiCall({action:'getClassSheet', className, term});
+    if(!data.success || !data.students || data.students.length===0){
+      area.className='empty'; area.textContent='No students found for this class.'; return;
+    }
+    sheetSubjects = data.subjects || [];
+    renderClassSheet(data.students, className, term);
+  } catch(e){
+    area.className='empty'; area.textContent='Could not load class sheet. Please try again.';
+  }
+});
+
+function renderClassSheet(students, className, term){
+  const area = document.getElementById('classSheetArea');
+  area.className = '';
+  let head = '<th class="name-th">Student</th>' + sheetSubjects.map(sub=>`<th>${sub}</th>`).join('');
+  let rows = students.map(s=>{
+    let cells = sheetSubjects.map(sub=>`<td><input class="score-input" type="number" min="0" max="100" data-admission="${s.admissionNo}" data-subject="${sub}"></td>`).join('');
+    return `<tr><td class="name-td">${s.fullName}</td>${cells}</tr>`;
+  }).join('');
+  area.innerHTML = `
+    <div class="sheet-wrap">
+      <table class="sheet-table">
+        <thead><tr>${head}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="sheet-actions">
+      <span class="sheet-status" id="sheetStatus"></span>
+      <button class="btn" id="submitClassSheetBtn" style="max-width:220px;">Submit Class Results</button>
+    </div>
+  `;
+  document.getElementById('submitClassSheetBtn').addEventListener('click', ()=>submitClassSheet(className, term));
+}
+
+async function submitClassSheet(className, term){
+  const status = document.getElementById('sheetStatus');
+  const inputs = document.querySelectorAll('#classSheetArea .score-input');
+  const byStudent = {};
+  inputs.forEach(inp=>{
+    const val = inp.value.trim();
+    if(val === '') return;
+    const adm = inp.dataset.admission;
+    if(!byStudent[adm]) byStudent[adm] = {};
+    byStudent[adm][inp.dataset.subject] = Number(val);
+  });
+  const results = Object.keys(byStudent).map(admissionNo => ({ admissionNo, scores: byStudent[admissionNo] }));
+  if(results.length === 0){ status.style.color='var(--flame)'; status.textContent='Enter at least one score first.'; return; }
+  status.style.color='#5A5D68'; status.textContent='Saving...';
+  try{
+    const data = await apiCall({ action:'submitClassResults', className, term, results: JSON.stringify(results) });
+    if(data.success){
+      status.style.color='var(--green-deep)'; status.textContent = data.message || 'Results saved.';
+    } else {
+      status.style.color='var(--flame)'; status.textContent = data.message || 'Could not save results.';
+    }
+  } catch(e){
+    status.style.color='var(--flame)'; status.textContent='Could not connect. Please try again.';
+  }
+}
+</script>
+</body>
+</html>
