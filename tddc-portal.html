@@ -158,11 +158,15 @@ tr:last-child td{border-bottom:none;}
 <span class="logout" data-logout>Log out</span>
 </div>
 <div class="subtabs">
-<div class="subtab active" data-sub="results" data-owner="student">Results</div>
+<div class="subtab active" data-sub="overview" data-owner="student">Overview</div>
+<div class="subtab" data-sub="results" data-owner="student">Results</div>
 <div class="subtab" data-sub="notes" data-owner="student">Note Bank</div>
 <div class="subtab" data-sub="fees" data-owner="student">School Fees</div>
 </div>
-<div class="subpanel active" id="student-results">
+<div class="subpanel active" id="student-overview">
+<div id="studentOverviewArea" class="loading">Loading overview...</div>
+</div>
+<div class="subpanel" id="student-results">
 <div class="field" style="max-width:220px;">
 <label for="termSelect">Term</label>
 <select id="termSelect">
@@ -276,7 +280,9 @@ document.querySelectorAll('.subtab').forEach(st=>{
     dash.querySelectorAll('.subpanel').forEach(p=>p.classList.remove('active'));
     const idPrefix = owner === 'student' ? 'student-' : 'teacher-';
     document.getElementById(idPrefix+st.dataset.sub).classList.add('active');
+    if(st.dataset.sub === 'overview' && currentStudent) loadStudentOverview();
     if(st.dataset.sub === 'fees' && currentStudent) loadStudentFees();
+    if(st.dataset.sub === 'notes' && currentStudent) loadStudentNotes();
     if(st.dataset.sub === 'payslips' && currentTeacher) loadStaffPayslips();
   });
 });
@@ -323,7 +329,7 @@ document.getElementById('studentLoginBtn').addEventListener('click', async ()=>{
       document.getElementById('studentWelcome').textContent = 'Welcome, ' + data.name;
       document.getElementById('studentClassLine').textContent = data.studentClass;
       currentStudent.admissionNo = admissionNo;
-      loadStudentNotes();
+      loadStudentOverview();
     } else {
       msg.style.color='var(--flame)'; msg.textContent = data.message;
     }
@@ -377,11 +383,14 @@ async function loadStudentNotes(){
   renderNotes(data, area);
 }
 
+let lastFeesData = null;
+
 async function loadStudentFees(){
   const area = document.getElementById('studentFeesArea');
   area.className='loading'; area.textContent='Loading fee information...';
   try{
     const data = await financeCall({action:'studentFees', admissionNo: currentStudent.admissionNo});
+    lastFeesData = data;
     if(!data.success){
       area.className='empty'; area.textContent='Could not load fee records.';
       return;
@@ -394,14 +403,37 @@ async function loadStudentFees(){
     const s = data.student;
     let html = `
       <div class="finance-summary">
-        <div class="finance-card"><div class="lbl">Term Fees</div><div class="amt">${naira(s.termFees)}</div></div>
+        <div class="finance-card"><div class="lbl">Total Owed</div><div class="amt">${naira(s.termFees)}</div></div>
         <div class="finance-card"><div class="lbl">Total Paid</div><div class="amt">${naira(s.totalPaid)}</div></div>
         <div class="finance-card ${Number(s.balance)>0?'warn':''}"><div class="lbl">Balance</div><div class="amt">${naira(s.balance)}</div></div>
       </div>`;
+
+    if(data.items && data.items.length){
+      html += '<h3 style="font-size:0.95rem;margin:18px 0 10px">Fee Breakdown</h3>';
+      html += '<table><thead><tr><th>Fee</th><th>Term</th><th>Amount</th></tr></thead><tbody>';
+      data.items.forEach(i=>{
+        html += `<tr><td>${i.name}</td><td>${i.term}</td><td>${naira(i.amount)}</td></tr>`;
+      });
+      html += '</tbody></table>';
+    }
+
+    const ps = data.paymentSettings || {};
+    if(ps.accountNumber){
+      html += `
+        <h3 style="font-size:0.95rem;margin:18px 0 10px">Where to Pay</h3>
+        <div class="finance-card" style="max-width:360px">
+          <div class="lbl">Bank</div><div style="font-weight:700;margin-bottom:8px">${ps.bankName||'—'}</div>
+          <div class="lbl">Account Name</div><div style="font-weight:700;margin-bottom:8px">${ps.accountName||'—'}</div>
+          <div class="lbl">Account Number</div><div style="font-weight:700;margin-bottom:8px">${ps.accountNumber||'—'}</div>
+          ${ps.instructions ? `<p style="font-size:0.82rem;color:#5A5D68;margin-top:6px">${ps.instructions}</p>` : ''}
+        </div>`;
+    }
+
+    html += '<h3 style="font-size:0.95rem;margin:18px 0 10px">Payment History</h3>';
     if(data.payments && data.payments.length){
-      html += '<table><thead><tr><th>Date</th><th>Amount</th><th>Term</th><th>Method</th><th>Receipt</th></tr></thead><tbody>';
+      html += '<table><thead><tr><th>Date</th><th>Amount</th><th>Fee Item</th><th>Method</th><th>Receipt</th></tr></thead><tbody>';
       data.payments.forEach(p=>{
-        html += `<tr><td>${p.date}</td><td>${naira(p.amount)}</td><td>${p.term}</td><td>${p.method}</td><td>${p.receiptNo||'—'}</td></tr>`;
+        html += `<tr><td>${p.date}</td><td>${naira(p.amount)}</td><td>${p.feeItem||p.term||'—'}</td><td>${p.method}</td><td>${p.receiptNo ? `<a href="#" onclick="printReceipt('${p.receiptNo}');return false;">${p.receiptNo}</a>` : '—'}</td></tr>`;
       });
       html += '</tbody></table>';
     } else {
@@ -410,6 +442,75 @@ async function loadStudentFees(){
     area.className=''; area.innerHTML = html;
   } catch(e){
     area.className='empty'; area.textContent='Finance service unavailable. Contact the school bursar.';
+  }
+}
+
+window.printReceipt = (receiptNo)=>{
+  if(!lastFeesData || !lastFeesData.payments) return;
+  const p = lastFeesData.payments.find(x=>x.receiptNo===receiptNo);
+  if(!p) return;
+  const s = lastFeesData.student || {};
+  const w = window.open('', '_blank', 'width=420,height=560');
+  w.document.write(`
+    <html><head><title>Receipt ${receiptNo}</title>
+    <style>
+      body{font-family:Arial,sans-serif;padding:24px;color:#1B2350;}
+      h2{margin-bottom:0;}
+      .line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;}
+      .total{font-weight:bold;font-size:1.1rem;margin-top:12px;}
+    </style></head><body>
+      <h2>TDDC Schools &amp; College</h2>
+      <p style="color:#666">Official Fee Payment Receipt</p>
+      <div class="line"><span>Receipt No.</span><span>${p.receiptNo}</span></div>
+      <div class="line"><span>Student</span><span>${p.studentName || currentStudent.name}</span></div>
+      <div class="line"><span>Admission No.</span><span>${p.admissionNo || currentStudent.admissionNo}</span></div>
+      <div class="line"><span>Fee Item</span><span>${p.feeItem||p.term||'—'}</span></div>
+      <div class="line"><span>Method</span><span>${p.method}</span></div>
+      <div class="line"><span>Date</span><span>${p.date}</span></div>
+      <div class="line total"><span>Amount Paid</span><span>${naira(p.amount)}</span></div>
+      <p style="margin-top:24px;color:#999;font-size:0.8rem">Generated from the TDDC parent portal.</p>
+      <script>window.print()<\/script>
+    </body></html>`);
+  w.document.close();
+};
+
+async function loadStudentOverview(){
+  const area = document.getElementById('studentOverviewArea');
+  area.className='loading'; area.textContent='Loading overview...';
+  try{
+    const [notesData, feesData] = await Promise.all([
+      apiCall({action:'getNotes', className: currentStudent.className}),
+      financeCall({action:'studentFees', admissionNo: currentStudent.admissionNo})
+    ]);
+
+    let balanceHtml = '<p class="empty">Fee information unavailable.</p>';
+    if(feesData && feesData.success && feesData.student){
+      const s = feesData.student;
+      balanceHtml = `
+        <div class="finance-summary">
+          <div class="finance-card"><div class="lbl">Total Owed</div><div class="amt">${naira(s.termFees)}</div></div>
+          <div class="finance-card"><div class="lbl">Total Paid</div><div class="amt">${naira(s.totalPaid)}</div></div>
+          <div class="finance-card ${Number(s.balance)>0?'warn':''}"><div class="lbl">Balance</div><div class="amt">${naira(s.balance)}</div></div>
+        </div>`;
+    } else if(feesData && feesData.message){
+      balanceHtml = `<p class="empty">${feesData.message}</p>`;
+    }
+
+    let noteHtml = '<p class="empty">No notes posted for your class yet.</p>';
+    if(notesData && notesData.success && notesData.notes && notesData.notes.length){
+      const n = notesData.notes[0];
+      noteHtml = `<div class="finance-card"><div class="lbl">${n.subject} · ${n.date}</div><div style="font-weight:700;margin-top:4px">${n.title}</div></div>`;
+    }
+
+    area.className = '';
+    area.innerHTML = `
+      <h3 style="font-size:0.95rem;margin-bottom:10px">School Fees</h3>
+      ${balanceHtml}
+      <h3 style="font-size:0.95rem;margin:20px 0 10px">Latest Note</h3>
+      ${noteHtml}
+    `;
+  } catch(e){
+    area.className='empty'; area.textContent='Could not load overview right now.';
   }
 }
 
