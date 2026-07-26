@@ -134,6 +134,7 @@
       <button class="tab" data-tab="staff">Staff</button>
       <button class="tab" data-tab="fees">School Fees</button>
       <button class="tab" data-tab="feeitems">Fee Structure</button>
+      <button class="tab" data-tab="accounts">Accounts</button>
       <button class="tab" data-tab="expenses">Expenses</button>
       <button class="tab" data-tab="budgets">Budgets</button>
       <button class="tab" data-tab="settings">Settings</button>
@@ -271,10 +272,15 @@
             <div class="field"><label>Amount (₦)</label><input type="number" id="fiAmount"></div>
             <div class="field"><label>Class</label><input id="fiClass" placeholder="All or e.g. JSS2"></div>
           </div>
-          <div class="field"><label>Term</label>
-            <select id="fiTerm">
-              <option>All Terms</option><option>First Term</option><option>Second Term</option><option>Third Term</option>
-            </select>
+          <div class="row2">
+            <div class="field"><label>Term</label>
+              <select id="fiTerm">
+                <option>All Terms</option><option>First Term</option><option>Second Term</option><option>Third Term</option>
+              </select>
+            </div>
+            <div class="field"><label>Pay Into</label>
+              <select id="fiAccount"></select>
+            </div>
           </div>
           <button class="btn" id="addFeeItemBtn">Add Fee Item</button>
           <div class="status" id="feeItemMsg"></div>
@@ -282,8 +288,32 @@
         <div>
           <h2>Current Fee Items</h2>
           <div class="table-wrap"><table>
-            <thead><tr><th>Name</th><th>Amount</th><th>Class</th><th>Term</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Name</th><th>Amount</th><th>Class</th><th>Term</th><th>Account</th><th>Status</th><th></th></tr></thead>
             <tbody id="feeItemsTable"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCOUNTS -->
+    <div class="panel" id="panel-accounts">
+      <div class="section-split">
+        <div>
+          <h2>Add Bank Account</h2>
+          <p style="color:#5A5D68;font-size:0.9rem;margin-bottom:12px">Set up one account per payment category — e.g. a Tuition Account and a separate Uniform Account. Link fee items to these under Fee Structure.</p>
+          <div class="field"><label>Account Label</label><input id="acName" placeholder="e.g. Tuition Account"></div>
+          <div class="field"><label>Bank Name</label><input id="acBankName"></div>
+          <div class="field"><label>Account Name</label><input id="acAccountName"></div>
+          <div class="field"><label>Account Number</label><input id="acAccountNumber"></div>
+          <div class="field"><label>Instructions</label><textarea id="acInstructions" placeholder="e.g. Use your child's admission number as payment reference."></textarea></div>
+          <button class="btn" id="addAccountBtn">Add Account</button>
+          <div class="status" id="accountMsg"></div>
+        </div>
+        <div>
+          <h2>Current Accounts</h2>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Label</th><th>Bank</th><th>Account No.</th><th></th></tr></thead>
+            <tbody id="accountsTable"></tbody>
           </table></div>
         </div>
       </div>
@@ -293,8 +323,8 @@
     <div class="panel" id="panel-settings">
       <div class="section-split">
         <div>
-          <h2>Payment Details Shown to Students</h2>
-          <p style="color:#5A5D68;font-size:0.9rem;margin-bottom:12px">This is the account information students and parents will see on the portal when paying fees.</p>
+          <h2>Fallback Payment Details</h2>
+          <p style="color:#5A5D68;font-size:0.9rem;margin-bottom:12px">Used only for a fee item that isn't linked to a specific account under Accounts. For category-specific accounts (Tuition, Uniform, etc.), use the Accounts tab instead.</p>
           <div class="field"><label>Bank Name</label><input id="setBankName"></div>
           <div class="field"><label>Account Name</label><input id="setAccountName"></div>
           <div class="field"><label>Account Number</label><input id="setAccountNumber"></div>
@@ -425,6 +455,7 @@ document.querySelectorAll('.tab').forEach(t=>{
 });
 
 async function loadAll(){
+  await loadAccounts();
   await Promise.all([loadDashboard(), loadStaff(), loadPayroll(), loadFeeItems(), loadStudents(), loadFeePayments(), loadExpenses(), loadBudgets(), loadSettings()]);
 }
 
@@ -533,6 +564,55 @@ document.getElementById('syncStudentsBtn').addEventListener('click', async ()=>{
   if(data.success) loadStudents();
 });
 
+let accountsCache = [];
+
+async function loadAccounts(){
+  const data = await api({action:'listAccounts'});
+  if(!data.success) return;
+  accountsCache = data.accounts || [];
+
+  document.getElementById('accountsTable').innerHTML = accountsCache.map(a=>`
+    <tr>
+      <td>${a.name}</td><td>${a.bankName}</td><td>${a.accountNumber}</td>
+      <td><button class="btn small secondary" onclick="removeAccount('${a.accountId}')">Delete</button></td>
+    </tr>`).join('') || '<tr><td colspan="4" class="empty">No accounts yet</td></tr>';
+
+  document.getElementById('fiAccount').innerHTML = accountsCache.length
+    ? accountsCache.map(a=>`<option value="${a.accountId}">${a.name}</option>`).join('')
+    : '<option value="">Add an account first</option>';
+}
+
+window.removeAccount = async (accountId)=>{
+  const data = await api({action:'deleteAccount', accountId}, 'POST');
+  const msg = document.getElementById('accountMsg');
+  msg.className = data.success ? 'status ok' : 'status err';
+  msg.textContent = data.message;
+  if(data.success) loadAccounts();
+};
+
+document.getElementById('addAccountBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('accountMsg');
+  const data = await api({
+    action:'addAccount',
+    name: document.getElementById('acName').value.trim(),
+    bankName: document.getElementById('acBankName').value.trim(),
+    accountName: document.getElementById('acAccountName').value.trim(),
+    accountNumber: document.getElementById('acAccountNumber').value.trim(),
+    instructions: document.getElementById('acInstructions').value.trim()
+  }, 'POST');
+  msg.className = data.success ? 'status ok' : 'status err';
+  msg.textContent = data.message;
+  if(data.success){
+    ['acName','acBankName','acAccountName','acAccountNumber','acInstructions'].forEach(id=>document.getElementById(id).value='');
+    loadAccounts();
+  }
+});
+
+function accountLabel(accountId){
+  const a = accountsCache.find(x=>x.accountId===accountId);
+  return a ? a.name : '—';
+}
+
 async function loadFeeItems(){
   const data = await api({action:'listFeeItems'});
   if(!data.success) return;
@@ -540,12 +620,13 @@ async function loadFeeItems(){
   document.getElementById('feeItemsTable').innerHTML = items.map(i=>`
     <tr>
       <td>${i.name}</td><td>${naira(i.amount)}</td><td>${i.className}</td><td>${i.term}</td>
+      <td>${accountLabel(i.accountId)}</td>
       <td>${badge(i.status)}</td>
       <td>
         <button class="btn small secondary" onclick="toggleFeeItem('${i.feeItemId}','${i.status}')">${String(i.status).toLowerCase()==='active'?'Deactivate':'Activate'}</button>
         <button class="btn small secondary" onclick="removeFeeItem('${i.feeItemId}')">Delete</button>
       </td>
-    </tr>`).join('') || '<tr><td colspan="6" class="empty">No fee items yet</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="7" class="empty">No fee items yet</td></tr>';
 
   document.getElementById('feeItemSelect').innerHTML =
     '<option value="General Payment">General Payment</option>' +
@@ -570,7 +651,8 @@ document.getElementById('addFeeItemBtn').addEventListener('click', async ()=>{
     name: document.getElementById('fiName').value.trim(),
     amount: document.getElementById('fiAmount').value,
     className: document.getElementById('fiClass').value.trim() || 'All',
-    term: document.getElementById('fiTerm').value
+    term: document.getElementById('fiTerm').value,
+    accountId: document.getElementById('fiAccount').value
   }, 'POST');
   msg.className = data.success ? 'status ok' : 'status err';
   msg.textContent = data.message;
