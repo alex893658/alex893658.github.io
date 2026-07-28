@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School Fees — TDDC Schools & College</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --navy:#1B2350; --green:#2E9E44; --green-deep:#1F7A34;
+      --flame:#E2492E; --gold:#D4A94C; --cream:#FBF8F2;
+      --ink:#1A1B1E; --paper:#FFFFFF; --line:rgba(27,35,80,0.12); --radius:14px;
+      --error:#B3452E;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);line-height:1.6;}
+    h1,h2,h3{font-family:'Fraunces',serif;color:var(--navy);}
+    header{background:var(--navy);padding:14px 24px;}
+    nav{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;font-family:'Fraunces',serif;font-weight:700;}
+    nav a.back{color:#C9CDE8;font-size:0.88rem;}
+    main{max-width:1000px;margin:0 auto;padding:32px 24px 80px;}
+
+    #loginView{min-height:70vh;display:flex;align-items:center;justify-content:center;}
+    .login-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:34px 30px;max-width:380px;width:100%;}
+    .login-card h1{font-size:1.5rem;margin-bottom:8px;}
+    .login-card p{color:#5A5D68;font-size:0.9rem;margin-bottom:22px;}
+
+    .field{margin-bottom:16px;}
+    .field label{display:block;font-size:0.84rem;font-weight:600;color:var(--navy);margin-bottom:6px;}
+    .field input,.field select,.field textarea{
+      width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:9px;
+      font-family:'Inter';font-size:0.94rem;background:var(--cream);
+    }
+    .field textarea{min-height:70px;resize:vertical;}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media(max-width:700px){.row2{grid-template-columns:1fr;}}
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:12px 20px;border-radius:999px;font-weight:600;font-size:0.92rem;
+      border:none;cursor:pointer;background:var(--flame);color:#fff;
+    }
+    .btn.secondary{background:var(--navy);}
+    .btn.small{padding:8px 14px;font-size:0.82rem;}
+    .status{font-size:0.86rem;margin-top:12px;min-height:1.2em;}
+    .status.ok{color:var(--green-deep);}
+    .status.err{color:var(--error);}
+
+    #appView{display:none;}
+    .dash-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+    .logout{color:var(--flame);font-weight:600;font-size:0.85rem;cursor:pointer;}
+
+    .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+    .tab{padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:#fff;
+      font-weight:600;font-size:0.86rem;color:var(--navy);cursor:pointer;}
+    .tab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+    .panel{display:none;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;}
+    .panel.active{display:block;}
+    .panel h2{font-size:1.15rem;margin-bottom:18px;}
+
+    table{width:100%;border-collapse:collapse;font-size:0.86rem;}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);}
+    th{background:var(--cream);color:var(--navy);font-weight:700;}
+    tr:last-child td{border-bottom:none;}
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);margin-top:16px;}
+    .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;}
+    .badge.paid,.badge.approved{background:#E6F5EA;color:var(--green-deep);}
+    .badge.pending{background:#FFF3E0;color:#B36B00;}
+    .badge.rejected{background:#FBE4E0;color:var(--flame);}
+    .section-split{display:grid;grid-template-columns:1fr 1.4fr;gap:24px;}
+    @media(max-width:900px){.section-split{grid-template-columns:1fr;}}
+    .empty{color:#8A8D97;text-align:center;padding:24px;font-size:0.9rem;}
+  </style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="brand">TDDC · School Fees</div>
+    <a class="back" href="index.html">← Back to website</a>
+  </nav>
+</header>
+
+<main>
+  <!-- LOGIN -->
+  <div id="loginView">
+    <div class="login-card">
+      <h1>Front Desk / Bursar</h1>
+      <p>Record school fee payments and manage the student fee list.</p>
+      <div class="field">
+        <label>Staff PIN</label>
+        <input type="password" id="staffPin" placeholder="Enter your PIN">
+      </div>
+      <button class="btn" style="width:100%" id="loginBtn">Enter</button>
+      <div class="status" id="loginMsg"></div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="appView">
+    <div class="dash-head">
+      <div>
+        <h1>School Fees</h1>
+        <p style="color:#5A5D68;font-size:0.9rem;margin-top:4px" id="welcomeMsg">TDDC Schools & College</p>
+      </div>
+      <span class="logout" id="logoutBtn">Log out</span>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="payments">Fee Payments</button>
+      <button class="tab" data-tab="receipts">Pending Receipts</button>
+      <button class="tab" data-tab="feeitems">Fee Structure</button>
+      <button class="tab" data-tab="students">Students</button>
+    </div>
+
+    <!-- FEE PAYMENTS -->
+    <div class="panel active" id="panel-payments">
+      <div class="section-split">
+        <div>
+          <h2>Record Fee Payment</h2>
+          <div class="field"><label>Student</label><select id="feeStudent"></select></div>
+          <div class="row2">
+            <div class="field"><label>Amount (₦)</label><input type="number" id="feeAmount"></div>
+            <div class="field"><label>Term</label>
+              <select id="feeTerm"><option>First Term</option><option>Second Term</option><option>Third Term</option></select>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>Fee Item</label><select id="feeItemSelect"></select></div>
+            <div class="field"><label>Method</label>
+              <select id="feeMethod"><option>Cash</option><option>Bank Transfer</option><option>POS</option><option>Cheque</option></select>
+            </div>
+          </div>
+          <button class="btn" id="addFeeBtn">Record Payment</button>
+          <div class="status" id="feeMsg"></div>
+        </div>
+        <div>
+          <h2>Recent Payments</h2>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Student</th><th>Amount</th><th>Fee Item</th><th>Receipt</th><th>Date</th></tr></thead>
+            <tbody id="feePaymentsTable"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDING RECEIPTS -->
+    <div class="panel" id="panel-receipts">
+      <h2>Receipts Awaiting Confirmation</h2>
+      <p style="color:#5A5D68;font-size:0.9rem;margin-bottom:16px">Open the receipt photo to check it, then confirm or reject. Confirming records the payment and updates the student's balance automatically.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Student</th><th>Fee Item</th><th>Amount</th><th>Receipt</th><th></th></tr></thead>
+        <tbody id="receiptsTable"></tbody>
+      </table></div>
+      <div class="status" id="receiptsMsg"></div>
+    </div>
+
+    <!-- FEE STRUCTURE -->
+    <div class="panel" id="panel-feeitems">
+      <div class="section-split">
+        <div>
+          <h2>Add Fee Item</h2>
+          <p style="color:#5A5D68;font-size:0.9rem;margin-bottom:12px">e.g. Tuition, Uniform, Books, Exam Fee. Set "Class" to "All" to apply it school-wide, or a specific class name (e.g. "JSS2").</p>
+          <div class="field"><label>Fee Name</label><input id="fiName" placeholder="Tuition"></div>
+          <div class="row2">
+            <div class="field"><label>Amount (₦)</label><input type="number" id="fiAmount"></div>
+            <div class="field"><label>Class</label><input id="fiClass" placeholder="All or e.g. JSS2"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>Term</label>
+              <select id="fiTerm">
+                <option>All Terms</option><option>First Term</option><option>Second Term</option><option>Third Term</option>
+              </select>
+            </div>
+            <div class="field"><label>Pay Into</label>
+              <select id="fiAccount"></select>
+            </div>
+          </div>
+          <button class="btn" id="addFeeItemBtn">Add Fee Item</button>
+          <div class="status" id="feeItemMsg"></div>
+        </div>
+        <div>
+          <h2>Current Fee Items</h2>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Name</th><th>Amount</th><th>Class</th><th>Term</th><th>Account</th><th>Status</th><th></th></tr></thead>
+            <tbody id="feeItemsTable"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDENTS -->
+    <div class="panel" id="panel-students">
+      <div class="section-split">
+        <div>
+          <h2>Add Student</h2>
+          <div class="field"><label>Admission No.</label><input id="newAdmNo"></div>
+          <div class="field"><label>Full Name</label><input id="newStuName"></div>
+          <div class="field"><label>Class</label><input id="newStuClass" placeholder="e.g. JSS2"></div>
+          <button class="btn" id="addStudentBtn">Add Student</button>
+          <div class="status" id="studentMsg"></div>
+        </div>
+        <div>
+          <h2>Students</h2>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Adm. No.</th><th>Name</th><th>Class</th><th>Balance</th></tr></thead>
+            <tbody id="studentsTable"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ==== Same Finance Apps Script Web App URL as the finance dashboard ====
+const FINANCE_API = "https://script.google.com/macros/s/AKfycbwccxwVk5m2pitZhhZ5xxB1rw7SjHJhA03Iw8fLoS29L3N1SFPgUz0fMxUEjDhz9Uelrw/exec";
+
+let adminPin = '';
+let accountsCache = [];
+
+function naira(n){ return '₦' + Number(n||0).toLocaleString('en-NG'); }
+function badge(status){
+  const s = String(status||'').toLowerCase();
+  const cls = (s==='paid'||s==='approved') ? 'paid' : 'pending';
+  return `<span class="badge ${cls}">${status||'—'}</span>`;
+}
+
+async function api(params, method='GET'){
+  if(method === 'POST'){
+    const res = await fetch(FINANCE_API, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(Object.assign({adminPin}, params))
+    });
+    return res.json();
+  }
+  const url = FINANCE_API + '?' + new URLSearchParams(Object.assign({adminPin}, params));
+  const res = await fetch(url);
+  return res.json();
+}
+
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const pin = document.getElementById('staffPin').value.trim();
+  const msg = document.getElementById('loginMsg');
+  if(!pin){ msg.className='status err'; msg.textContent='Enter your PIN.'; return; }
+  msg.className='status'; msg.textContent='Checking...';
+  const data = await api({action:'bursarLogin', adminPin: pin});
+  if(data.success){
+    adminPin = pin;
+    document.getElementById('welcomeMsg').textContent = 'Welcome, ' + (data.name || 'Staff') + ' — TDDC Schools & College';
+    document.getElementById('loginView').style.display='none';
+    document.getElementById('appView').style.display='block';
+    loadAll();
+  } else {
+    msg.className='status err'; msg.textContent = data.message;
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  adminPin = '';
+  document.getElementById('appView').style.display='none';
+  document.getElementById('loginView').style.display='flex';
+  document.getElementById('staffPin').value = '';
+});
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+  });
+});
+
+async function loadAll(){
+  await loadAccounts();
+  await Promise.all([loadFeeItems(), loadStudents(), loadFeePayments(), loadReceipts()]);
+}
+
+function accountLabel(accountId){
+  const a = accountsCache.find(x=>x.accountId===accountId);
+  return a ? a.name : '—';
+}
+
+async function loadAccounts(){
+  const data = await api({action:'listAccounts'});
+  if(!data.success) return;
+  accountsCache = data.accounts || [];
+  document.getElementById('fiAccount').innerHTML = accountsCache.length
+    ? accountsCache.map(a=>`<option value="${a.accountId}">${a.name}</option>`).join('')
+    : '<option value="">No accounts set up yet</option>';
+}
+
+async function loadFeeItems(){
+  const data = await api({action:'listFeeItems'});
+  if(!data.success) return;
+  const items = data.feeItems || [];
+  document.getElementById('feeItemsTable').innerHTML = items.map(i=>`
+    <tr>
+      <td>${i.name}</td><td>${naira(i.amount)}</td><td>${i.className}</td><td>${i.term}</td>
+      <td>${accountLabel(i.accountId)}</td>
+      <td>${badge(i.status)}</td>
+      <td><button class="btn small secondary" onclick="toggleFeeItem('${i.feeItemId}','${i.status}')">${String(i.status).toLowerCase()==='active'?'Deactivate':'Activate'}</button></td>
+    </tr>`).join('') || '<tr><td colspan="7" class="empty">No fee items yet</td></tr>';
+
+  document.getElementById('feeItemSelect').innerHTML =
+    '<option value="General Payment">General Payment</option>' +
+    items.map(i=>`<option value="${i.name}">${i.name}</option>`).join('');
+}
+
+window.toggleFeeItem = async (feeItemId, currentStatus)=>{
+  const newStatus = String(currentStatus).toLowerCase()==='active' ? 'inactive' : 'active';
+  const data = await api({action:'updateFeeItem', feeItemId, status:newStatus}, 'POST');
+  if(data.success){ loadFeeItems(); loadStudents(); }
+};
+
+document.getElementById('addFeeItemBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('feeItemMsg');
+  const data = await api({
+    action:'addFeeItem',
+    name: document.getElementById('fiName').value.trim(),
+    amount: document.getElementById('fiAmount').value,
+    className: document.getElementById('fiClass').value.trim() || 'All',
+    term: document.getElementById('fiTerm').value,
+    accountId: document.getElementById('fiAccount').value
+  }, 'POST');
+  msg.className = data.success ? 'status ok' : 'status err';
+  msg.textContent = data.message;
+  if(data.success){
+    ['fiName','fiAmount','fiClass'].forEach(id=>document.getElementById(id).value='');
+    loadFeeItems(); loadStudents();
+  }
+});
+
+async function loadStudents(){
+  const data = await api({action:'listStudents'});
+  if(!data.success) return;
+  const students = data.students || [];
+  document.getElementById('studentsTable').innerHTML = students.map(s=>
+    `<tr><td>${s.admissionNo}</td><td>${s.fullName}</td><td>${s.studentClass}</td><td>${naira(s.balance)}</td></tr>`
+  ).join('') || '<tr><td colspan="4" class="empty">No students yet</td></tr>';
+
+  document.getElementById('feeStudent').innerHTML = students.map(s=>
+    `<option value="${s.admissionNo}">${s.fullName} (${s.admissionNo})</option>`
+  ).join('');
+}
+
+document.getElementById('addStudentBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('studentMsg');
+  const data = await api({
+    action:'addStudent',
+    admissionNo: document.getElementById('newAdmNo').value.trim(),
+    fullName: document.getElementById('newStuName').value.trim(),
+    studentClass: document.getElementById('newStuClass').value.trim()
+  }, 'POST');
+  msg.className = data.success ? 'status ok' : 'status err';
+  msg.textContent = data.message;
+  if(data.success){
+    ['newAdmNo','newStuName','newStuClass'].forEach(id=>document.getElementById(id).value='');
+    loadStudents();
+  }
+});
+
+async function loadFeePayments(){
+  const data = await api({action:'listFeePayments'});
+  if(!data.success) return;
+  document.getElementById('feePaymentsTable').innerHTML = (data.payments||[]).map(p=>
+    `<tr><td>${p.studentName}</td><td>${naira(p.amount)}</td><td>${p.feeItem||'—'}</td><td>${p.receiptNo||'—'}</td><td>${p.date}</td></tr>`
+  ).join('') || '<tr><td colspan="5" class="empty">No payments yet</td></tr>';
+}
+
+document.getElementById('addFeeBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('feeMsg');
+  const data = await api({
+    action:'addFeePayment',
+    admissionNo: document.getElementById('feeStudent').value,
+    amount: document.getElementById('feeAmount').value,
+    term: document.getElementById('feeTerm').value,
+    method: document.getElementById('feeMethod').value,
+    feeItem: document.getElementById('feeItemSelect').value
+  }, 'POST');
+  msg.className = data.success ? 'status ok' : 'status err';
+  msg.textContent = data.message;
+  if(data.success){ loadStudents(); loadFeePayments(); document.getElementById('feeAmount').value=''; }
+});
+
+async function loadReceipts(){
+  const data = await api({action:'listReceiptSubmissions', status:'pending'});
+  if(!data.success) return;
+  const rows = data.submissions || [];
+  document.getElementById('receiptsTable').innerHTML = rows.map(r=>`
+    <tr>
+      <td>${r.submittedDate}</td><td>${r.studentName}</td><td>${r.feeItemName}</td><td>${naira(r.amount)}</td>
+      <td><a href="${r.fileUrl}" target="_blank" rel="noopener">View</a></td>
+      <td>
+        <button class="btn small" onclick="confirmReceipt('${r.submissionId}')">Confirm</button>
+        <button class="btn small secondary" onclick="rejectReceipt('${r.submissionId}')">Reject</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="6" class="empty">No pending receipts</td></tr>';
+
+  const tabBtn = document.querySelector('.tab[data-tab="receipts"]');
+  if(tabBtn) tabBtn.textContent = rows.length ? `Pending Receipts (${rows.length})` : 'Pending Receipts';
+}
+
+window.confirmReceipt = async (submissionId)=>{
+  const msg = document.getElementById('receiptsMsg');
+  const data = await api({action:'confirmReceipt', submissionId, reviewedBy: 'Bursar'}, 'POST');
+  msg.className = data.success ? 'status ok' : 'status err';
+  msg.textContent = data.message;
+  if(data.success){ loadReceipts(); loadStudents(); loadFeePayments(); }
+};
+
+window.rejectReceipt = async (submissionId)=>{
+  const note = prompt('Reason for rejecting this receipt (optional):') || '';
+  const msg = document.getElementById('receiptsMsg');
+  const data = await api({action:'rejectReceipt', submissionId, reviewedBy: 'Bursar', reviewNote: note}, 'POST');
+  msg.className = data.success ? 'status ok' : 'status err';
+  msg.textContent = data.message;
+  if(data.success) loadReceipts();
+};
+</script>
+</body>
+</html>
