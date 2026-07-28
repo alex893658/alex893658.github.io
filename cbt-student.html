@@ -144,7 +144,7 @@
     <!-- STEP 4: RESULT -->
     <div id="resultStep" class="hidden">
       <div class="score-box">
-        <div class="big" style="font-size:2.2rem;">Successfully Submitted</div>
+        <div class="big" id="scoreBig" style="font-size:2.6rem;">–</div>
         <div class="progress-note" id="scoreDetail"></div>
       </div>
       <button onclick="backToSubjects()">Take Another Subject</button>
@@ -309,7 +309,8 @@
 
       document.getElementById('examStep').classList.add('hidden');
       document.getElementById('resultStep').classList.remove('hidden');
-      document.getElementById('scoreDetail').textContent = `${res.totalQuestions} questions submitted for ${student.subject}`;
+      document.getElementById('scoreBig').textContent = res.score + ' / ' + res.totalMarks;
+      document.getElementById('scoreDetail').textContent = `${student.subject} — ${res.totalQuestions} questions`;
     } catch (err) {
       showLoading(false);
       alert('Connection error while submitting: ' + err.message);
