@@ -95,6 +95,7 @@ tr:last-child td{border-bottom:none;}
 .finance-card.warn .amt{color:var(--flame);}
 .badge-paid{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#E6F5EA;color:var(--green-deep);}
 .badge-pending{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#FFF3E0;color:#B36B00;}
+.badge-rejected{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#FBE4E0;color:var(--flame);}
 </style>
 </head>
 <body>
@@ -183,6 +184,30 @@ tr:last-child td{border-bottom:none;}
 </div>
 <div class="subpanel" id="student-fees">
 <div id="studentFeesArea" class="loading">Loading fee information...</div>
+<div class="card" style="margin-top:20px;">
+<h3 style="font-size:0.98rem;margin-bottom:14px;">Upload Payment Receipt</h3>
+<div class="field">
+<label for="receiptFeeItem">Fee Item</label>
+<select id="receiptFeeItem"></select>
+</div>
+<div class="field">
+<label for="receiptAmount">Amount Paid (₦)</label>
+<input id="receiptAmount" type="number" placeholder="e.g. 50000">
+</div>
+<div class="field">
+<label for="receiptTerm">Term</label>
+<select id="receiptTerm">
+<option>First Term</option><option>Second Term</option><option>Third Term</option>
+</select>
+</div>
+<div class="field">
+<label for="receiptFile">Receipt Photo</label>
+<input id="receiptFile" type="file" accept="image/*,.pdf">
+</div>
+<button class="btn secondary" id="uploadReceiptBtn">Submit Receipt</button>
+<p class="login-msg" id="uploadReceiptMsg"></p>
+</div>
+<div id="myReceiptsArea" style="margin-top:20px;"></div>
 </div>
 </div>
 
@@ -307,6 +332,15 @@ async function apiCall(params){
 async function financeCall(params){
   const url = FINANCE_API + '?' + new URLSearchParams(params).toString();
   const res = await fetch(url);
+  return res.json();
+}
+
+async function financeCallPost(params){
+  const res = await fetch(FINANCE_API, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    body: JSON.stringify(params)
+  });
   return res.json();
 }
 
@@ -440,12 +474,89 @@ async function loadStudentFees(){
       html += '<p class="empty">No payments recorded yet.</p>';
     }
     area.className=''; area.innerHTML = html;
+
+    document.getElementById('receiptFeeItem').innerHTML =
+      '<option value="General Payment">General Payment</option>' +
+      (data.items || []).map(i=>`<option value="${i.name}">${i.name}</option>`).join('');
+
+    loadMyReceipts();
   } catch(e){
     area.className='empty'; area.textContent='Finance service unavailable. Contact the school bursar.';
   }
 }
 
-window.printReceipt = (receiptNo)=>{
+function receiptBadge(status){
+  const s = String(status||'').toLowerCase();
+  if(s==='confirmed') return '<span class="badge-paid">Confirmed</span>';
+  if(s==='rejected') return '<span class="badge-rejected">Rejected</span>';
+  return '<span class="badge-pending">Pending Review</span>';
+}
+
+async function loadMyReceipts(){
+  const area = document.getElementById('myReceiptsArea');
+  try{
+    const data = await financeCall({action:'listMyReceipts', admissionNo: currentStudent.admissionNo});
+    if(!data.success || !data.submissions || data.submissions.length===0){
+      area.innerHTML = '';
+      return;
+    }
+    let html = '<h3 style="font-size:0.95rem;margin-bottom:10px">My Submitted Receipts</h3>';
+    html += '<table><thead><tr><th>Date</th><th>Fee Item</th><th>Amount</th><th>Status</th></tr></thead><tbody>';
+    data.submissions.forEach(s=>{
+      html += `<tr><td>${s.submittedDate}</td><td>${s.feeItemName}</td><td>${naira(s.amount)}</td><td>${receiptBadge(s.status)}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    area.innerHTML = html;
+  } catch(e){
+    area.innerHTML = '';
+  }
+}
+
+document.getElementById('uploadReceiptBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('uploadReceiptMsg');
+  const fileInput = document.getElementById('receiptFile');
+  const amount = document.getElementById('receiptAmount').value;
+  const feeItem = document.getElementById('receiptFeeItem').value;
+  const term = document.getElementById('receiptTerm').value;
+
+  if(!fileInput.files.length || !amount){
+    msg.style.color='var(--flame)'; msg.textContent='Please enter the amount and choose a receipt photo.';
+    return;
+  }
+  const file = fileInput.files[0];
+  if(file.size > 5 * 1024 * 1024){
+    msg.style.color='var(--flame)'; msg.textContent='That file is too large. Please use a photo under 5MB.';
+    return;
+  }
+
+  msg.style.color='#5A5D68'; msg.textContent='Uploading...';
+  try{
+    const fileData = await new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const data = await financeCallPost({
+      action:'submitReceipt',
+      admissionNo: currentStudent.admissionNo,
+      feeItem, amount, term,
+      fileData, fileName: file.name, mimeType: file.type
+    });
+
+    if(data.success){
+      msg.style.color='var(--green-deep)'; msg.textContent = data.message;
+      document.getElementById('receiptAmount').value = '';
+      fileInput.value = '';
+      loadMyReceipts();
+    } else {
+      msg.style.color='var(--flame)'; msg.textContent = data.message;
+    }
+  } catch(e){
+    msg.style.color='var(--flame)'; msg.textContent='Could not upload. Please try again.';
+  }
+});
   if(!lastFeesData || !lastFeesData.payments) return;
   const p = lastFeesData.payments.find(x=>x.receiptNo===receiptNo);
   if(!p) return;
