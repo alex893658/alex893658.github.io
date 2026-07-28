@@ -68,6 +68,7 @@
     .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;}
     .badge.paid,.badge.approved{background:#E6F5EA;color:var(--green-deep);}
     .badge.pending{background:#FFF3E0;color:#B36B00;}
+    .badge.rejected{background:#FBE4E0;color:var(--flame);}
     .section-split{display:grid;grid-template-columns:1fr 1.4fr;gap:24px;}
     @media(max-width:900px){.section-split{grid-template-columns:1fr;}}
     .empty{color:#8A8D97;text-align:center;padding:24px;font-size:0.9rem;}
@@ -109,6 +110,7 @@
 
     <div class="tabs">
       <button class="tab active" data-tab="payments">Fee Payments</button>
+      <button class="tab" data-tab="receipts">Pending Receipts</button>
       <button class="tab" data-tab="feeitems">Fee Structure</button>
       <button class="tab" data-tab="students">Students</button>
     </div>
@@ -142,6 +144,17 @@
           </table></div>
         </div>
       </div>
+    </div>
+
+    <!-- PENDING RECEIPTS -->
+    <div class="panel" id="panel-receipts">
+      <h2>Receipts Awaiting Confirmation</h2>
+      <p style="color:#5A5D68;font-size:0.9rem;margin-bottom:16px">Open the receipt photo to check it, then confirm or reject. Confirming records the payment and updates the student's balance automatically.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Student</th><th>Fee Item</th><th>Amount</th><th>Receipt</th><th></th></tr></thead>
+        <tbody id="receiptsTable"></tbody>
+      </table></div>
+      <div class="status" id="receiptsMsg"></div>
     </div>
 
     <!-- FEE STRUCTURE -->
@@ -264,7 +277,7 @@ document.querySelectorAll('.tab').forEach(t=>{
 
 async function loadAll(){
   await loadAccounts();
-  await Promise.all([loadFeeItems(), loadStudents(), loadFeePayments()]);
+  await Promise.all([loadFeeItems(), loadStudents(), loadFeePayments(), loadReceipts()]);
 }
 
 function accountLabel(accountId){
@@ -373,6 +386,41 @@ document.getElementById('addFeeBtn').addEventListener('click', async ()=>{
   msg.textContent = data.message;
   if(data.success){ loadStudents(); loadFeePayments(); document.getElementById('feeAmount').value=''; }
 });
+
+async function loadReceipts(){
+  const data = await api({action:'listReceiptSubmissions', status:'pending'});
+  if(!data.success) return;
+  const rows = data.submissions || [];
+  document.getElementById('receiptsTable').innerHTML = rows.map(r=>`
+    <tr>
+      <td>${r.submittedDate}</td><td>${r.studentName}</td><td>${r.feeItemName}</td><td>${naira(r.amount)}</td>
+      <td><a href="${r.fileUrl}" target="_blank" rel="noopener">View</a></td>
+      <td>
+        <button class="btn small" onclick="confirmReceipt('${r.submissionId}')">Confirm</button>
+        <button class="btn small secondary" onclick="rejectReceipt('${r.submissionId}')">Reject</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="6" class="empty">No pending receipts</td></tr>';
+
+  const tabBtn = document.querySelector('.tab[data-tab="receipts"]');
+  if(tabBtn) tabBtn.textContent = rows.length ? `Pending Receipts (${rows.length})` : 'Pending Receipts';
+}
+
+window.confirmReceipt = async (submissionId)=>{
+  const msg = document.getElementById('receiptsMsg');
+  const data = await api({action:'confirmReceipt', submissionId, reviewedBy: 'Bursar'}, 'POST');
+  msg.className = data.success ? 'status ok' : 'status err';
+  msg.textContent = data.message;
+  if(data.success){ loadReceipts(); loadStudents(); loadFeePayments(); }
+};
+
+window.rejectReceipt = async (submissionId)=>{
+  const note = prompt('Reason for rejecting this receipt (optional):') || '';
+  const msg = document.getElementById('receiptsMsg');
+  const data = await api({action:'rejectReceipt', submissionId, reviewedBy: 'Bursar', reviewNote: note}, 'POST');
+  msg.className = data.success ? 'status ok' : 'status err';
+  msg.textContent = data.message;
+  if(data.success) loadReceipts();
+};
 </script>
 </body>
 </html>
