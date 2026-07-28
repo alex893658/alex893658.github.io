@@ -188,9 +188,18 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
     <!-- RESULTS -->
     <div class="card hidden" id="tab-results">
       <h2>Results</h2>
-      <label>Filter by subject</label>
-      <input id="resultsSubjectFilter" placeholder="Leave blank for all">
+      <div class="row2">
+        <div>
+          <label>Filter by class</label>
+          <input id="resultsClassFilter" placeholder="e.g. JSS2 — leave blank for all">
+        </div>
+        <div>
+          <label>Filter by subject</label>
+          <input id="resultsSubjectFilter" placeholder="e.g. Mathematics — leave blank for all">
+        </div>
+      </div>
       <button onclick="loadResults()">Load</button>
+      <p class="muted" id="resultsSummary" style="margin-top:10px;"></p>
       <table id="resultsTable">
         <thead><tr><th>Student</th><th>Class</th><th>Subject</th><th>Score</th><th>Date</th></tr></thead>
         <tbody></tbody>
@@ -422,7 +431,8 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
 
   async function loadResults() {
     const subject = document.getElementById('resultsSubjectFilter').value.trim();
-    const res = await callApi({ action: 'getResults', subject });
+    const className = document.getElementById('resultsClassFilter').value.trim();
+    const res = await callApi({ action: 'getResults', subject, className });
     const tbody = document.querySelector('#resultsTable tbody');
     tbody.innerHTML = res.results.map(r => `
       <tr>
@@ -433,6 +443,16 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
         <td>${new Date(r.Timestamp).toLocaleDateString()}</td>
       </tr>
     `).join('') || '<tr><td colspan="5" class="muted">No results yet.</td></tr>';
+
+    const summary = document.getElementById('resultsSummary');
+    if (res.results.length) {
+      const avgPct = Math.round(
+        res.results.reduce((sum, r) => sum + (Number(r.Score) / (Number(r.TotalMarks) || 1)), 0) / res.results.length * 100
+      );
+      summary.textContent = `${res.results.length} result(s) — class average: ${avgPct}%`;
+    } else {
+      summary.textContent = '';
+    }
   }
 
   async function saveExamConfig() {
