@@ -557,6 +557,8 @@ document.getElementById('uploadReceiptBtn').addEventListener('click', async ()=>
     msg.style.color='var(--flame)'; msg.textContent='Could not upload. Please try again.';
   }
 });
+
+window.printReceipt = (receiptNo)=>{
   if(!lastFeesData || !lastFeesData.payments) return;
   const p = lastFeesData.payments.find(x=>x.receiptNo===receiptNo);
   if(!p) return;
