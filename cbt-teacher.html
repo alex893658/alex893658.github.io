@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TDDC CBT — Teacher Portal</title>
+<title>TDDC CBT — Teachers</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -50,18 +50,13 @@
   .error { color: #c0392b; font-size: 0.85rem; margin-top: 8px; }
   .success { color: var(--green); font-size: 0.85rem; margin-top: 8px; }
   .muted { color: var(--muted); font-size: 0.85rem; }
-  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
-  .stat-box { background: #f2f6f4; border-radius: 10px; padding: 16px 10px; text-align: center; }
-  .stat-num { font-family: 'Fraunces', serif; font-size: 1.8rem; color: var(--navy); }
-  .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
-  @media (max-width: 560px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
 </style>
 </head>
 <body>
 
 <header>
   <h1>TDDC Schools & College</h1>
-  <p>Teacher / Exam Admin Portal</p>
+  <p>Teachers CBT — Add & Manage Your Questions</p>
 </header>
 
 <div class="wrap">
@@ -80,39 +75,13 @@
   <!-- MAIN APP -->
   <div id="app" class="hidden">
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
-      <button class="tab-btn" onclick="switchTab('add')">Add Question</button>
+      <button class="tab-btn active" onclick="switchTab('add')">Add Question</button>
       <button class="tab-btn" onclick="switchTab('bulk')">Bulk Upload</button>
       <button class="tab-btn" onclick="switchTab('manage')">Manage Questions</button>
-      <button class="tab-btn" onclick="switchTab('results')">Results</button>
-      <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
-    </div>
-
-    <!-- DASHBOARD -->
-    <div class="card" id="tab-dashboard">
-      <h2>Overview</h2>
-      <div class="stat-grid" id="statGrid">
-        <div class="stat-box"><div class="stat-num" id="stat_questions">–</div><div class="stat-label">Questions in bank</div></div>
-        <div class="stat-box"><div class="stat-num" id="stat_subjects">–</div><div class="stat-label">Subjects</div></div>
-        <div class="stat-box"><div class="stat-num" id="stat_exams">–</div><div class="stat-label">Exams taken</div></div>
-        <div class="stat-box"><div class="stat-num" id="stat_avg">–</div><div class="stat-label">Average score</div></div>
-      </div>
-
-      <h2 style="margin-top:24px;">By Subject</h2>
-      <table id="subjectBreakdownTable">
-        <thead><tr><th>Subject</th><th>Questions</th><th>Exams Taken</th></tr></thead>
-        <tbody></tbody>
-      </table>
-
-      <h2 style="margin-top:24px;">Recent Results</h2>
-      <table id="recentResultsTable">
-        <thead><tr><th>Student</th><th>Subject</th><th>Score</th><th>Date</th></tr></thead>
-        <tbody></tbody>
-      </table>
     </div>
 
     <!-- ADD QUESTION -->
-    <div class="card hidden" id="tab-add">
+    <div class="card" id="tab-add">
       <h2>Add Question</h2>
       <div class="row2">
         <div>
@@ -176,6 +145,7 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
     <!-- MANAGE QUESTIONS -->
     <div class="card hidden" id="tab-manage">
       <h2>Manage Questions</h2>
+      <p class="muted">You can see and remove questions here, but not exam results — ask your exam officer for those.</p>
       <label>Filter by subject</label>
       <input id="manageSubjectFilter" placeholder="Leave blank for all">
       <button onclick="loadQuestions()">Load</button>
@@ -184,72 +154,19 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
         <tbody></tbody>
       </table>
     </div>
-
-    <!-- RESULTS -->
-    <div class="card hidden" id="tab-results">
-      <h2>Results</h2>
-      <div class="row2">
-        <div>
-          <label>Filter by class</label>
-          <input id="resultsClassFilter" placeholder="e.g. JSS2 — leave blank for all">
-        </div>
-        <div>
-          <label>Filter by subject</label>
-          <input id="resultsSubjectFilter" placeholder="e.g. Mathematics — leave blank for all">
-        </div>
-      </div>
-      <button onclick="loadResults()">Load</button>
-      <p class="muted" id="resultsSummary" style="margin-top:10px;"></p>
-      <table id="resultsTable">
-        <thead><tr><th>Student</th><th>Class</th><th>Subject</th><th>Score</th><th>Date</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <!-- SETTINGS -->
-    <div class="card hidden" id="tab-settings">
-      <h2>Exam Settings</h2>
-      <p class="muted">Set how many random questions each exam pulls, and the time limit, per subject. Leave Class blank to apply to every class taking that subject.</p>
-      <div class="row2">
-        <div>
-          <label>Subject</label>
-          <input id="cfg_subject" placeholder="e.g. Mathematics">
-        </div>
-        <div>
-          <label>Class (optional)</label>
-          <input id="cfg_class" placeholder="e.g. JSS1">
-        </div>
-      </div>
-      <div class="row2">
-        <div>
-          <label>Questions per exam</label>
-          <input id="cfg_questions" type="number" value="60" min="1">
-        </div>
-        <div>
-          <label>Duration (minutes)</label>
-          <input id="cfg_duration" type="number" value="45" min="1">
-        </div>
-      </div>
-      <button onclick="saveExamConfig()">Save Setting</button>
-      <div class="success hidden" id="cfgSuccess">Saved.</div>
-
-      <h2 style="margin-top:24px;">Current Settings</h2>
-      <table id="configTable">
-        <thead><tr><th>Subject</th><th>Class</th><th>Questions</th><th>Minutes</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
   </div>
 </div>
 
 <script>
-  // ⚠️ Replace with your deployed Apps Script Web App URL (same as student page)
+  // ⚠️ Same deployed Apps Script Web App URL as the other CBT pages
   const API_URL = 'https://script.google.com/macros/s/AKfycbzPT3ToJxGZXtL047qn5eDfSwflzKdbmyvL50sETzh2lUaLS3-EUxcXrIFUoH0kzuzJ/exec';
 
   async function callApi(payload) {
     const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
     return res.json();
   }
+
+  let staffName = '';
 
   async function teacherLogin() {
     const staffId = document.getElementById('staffId').value.trim();
@@ -259,56 +176,18 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
       document.getElementById('loginError').classList.remove('hidden');
       return;
     }
+    staffName = res.name || staffId;
     document.getElementById('loginCard').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
-    loadDashboard();
   }
 
   function switchTab(tab) {
-    ['dashboard', 'add', 'bulk', 'manage', 'results', 'settings'].forEach(t => {
+    ['add', 'bulk', 'manage'].forEach(t => {
       document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
     });
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     event.target.classList.add('active');
-    if (tab === 'dashboard') loadDashboard();
     if (tab === 'manage') loadQuestions();
-    if (tab === 'results') loadResults();
-    if (tab === 'settings') loadExamConfigs();
-  }
-
-  async function loadDashboard() {
-    const [qRes, rRes] = await Promise.all([
-      callApi({ action: 'getAllQuestions' }),
-      callApi({ action: 'getResults' })
-    ]);
-    const questions = qRes.questions || [];
-    const results = rRes.results || [];
-
-    const subjects = [...new Set(questions.map(q => q.Subject))];
-    document.getElementById('stat_questions').textContent = questions.length;
-    document.getElementById('stat_subjects').textContent = subjects.length;
-    document.getElementById('stat_exams').textContent = results.length;
-
-    const avg = results.length
-      ? Math.round(results.reduce((sum, r) => sum + (Number(r.Score) / (Number(r.TotalMarks) || 1)), 0) / results.length * 100)
-      : null;
-    document.getElementById('stat_avg').textContent = avg !== null ? avg + '%' : '–';
-
-    document.querySelector('#subjectBreakdownTable tbody').innerHTML = subjects.map(s => {
-      const qCount = questions.filter(q => q.Subject === s).length;
-      const eCount = results.filter(r => r.Subject === s).length;
-      return `<tr><td>${s}</td><td>${qCount}</td><td>${eCount}</td></tr>`;
-    }).join('') || '<tr><td colspan="3" class="muted">No questions yet.</td></tr>';
-
-    const recent = results.slice(-8).reverse();
-    document.querySelector('#recentResultsTable tbody').innerHTML = recent.map(r => `
-      <tr>
-        <td>${r.Name} <span class="muted">(${r.StudentID})</span></td>
-        <td>${r.Subject}</td>
-        <td>${r.Score} / ${r.TotalMarks}</td>
-        <td>${new Date(r.Timestamp).toLocaleDateString()}</td>
-      </tr>
-    `).join('') || '<tr><td colspan="4" class="muted">No exams taken yet.</td></tr>';
   }
 
   let parsedBulkQuestions = [];
@@ -369,7 +248,7 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
 
   async function confirmBulkUpload() {
     if (!parsedBulkQuestions.length) return;
-    const res = await callApi({ action: 'bulkAddQuestions', questions: JSON.stringify(parsedBulkQuestions) });
+    const res = await callApi({ action: 'bulkAddQuestions', questions: JSON.stringify(parsedBulkQuestions), actor: staffName });
     const successBox = document.getElementById('bulkSuccess');
     if (res.success) {
       successBox.textContent = `${res.added} question(s) uploaded successfully.`;
@@ -394,7 +273,8 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
       optionC: document.getElementById('q_c').value.trim(),
       optionD: document.getElementById('q_d').value.trim(),
       correctAnswer: document.getElementById('q_correct').value,
-      marks: Number(document.getElementById('q_marks').value) || 1
+      marks: Number(document.getElementById('q_marks').value) || 1,
+      actor: staffName
     };
     if (!payload.subject || !payload.question || !payload.optionA || !payload.optionB) {
       alert('Please fill in subject, question, and at least options A and B.');
@@ -427,62 +307,6 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
     if (!confirm('Delete this question?')) return;
     await callApi({ action: 'deleteQuestion', questionId: id });
     loadQuestions();
-  }
-
-  async function loadResults() {
-    const subject = document.getElementById('resultsSubjectFilter').value.trim();
-    const className = document.getElementById('resultsClassFilter').value.trim();
-    const res = await callApi({ action: 'getResults', subject, className });
-    const tbody = document.querySelector('#resultsTable tbody');
-    tbody.innerHTML = res.results.map(r => `
-      <tr>
-        <td>${r.Name} <span class="muted">(${r.StudentID})</span></td>
-        <td>${r.Class}</td>
-        <td>${r.Subject}</td>
-        <td>${r.Score} / ${r.TotalMarks}</td>
-        <td>${new Date(r.Timestamp).toLocaleDateString()}</td>
-      </tr>
-    `).join('') || '<tr><td colspan="5" class="muted">No results yet.</td></tr>';
-
-    const summary = document.getElementById('resultsSummary');
-    if (res.results.length) {
-      const avgPct = Math.round(
-        res.results.reduce((sum, r) => sum + (Number(r.Score) / (Number(r.TotalMarks) || 1)), 0) / res.results.length * 100
-      );
-      summary.textContent = `${res.results.length} result(s) — class average: ${avgPct}%`;
-    } else {
-      summary.textContent = '';
-    }
-  }
-
-  async function saveExamConfig() {
-    const subject = document.getElementById('cfg_subject').value.trim();
-    const className = document.getElementById('cfg_class').value.trim();
-    const questionsPerExam = document.getElementById('cfg_questions').value;
-    const durationMinutes = document.getElementById('cfg_duration').value;
-    if (!subject || !questionsPerExam || !durationMinutes) {
-      alert('Please fill in subject, questions per exam, and duration.');
-      return;
-    }
-    await callApi({ action: 'setExamConfig', subject, className, questionsPerExam, durationMinutes });
-    document.getElementById('cfgSuccess').classList.remove('hidden');
-    setTimeout(() => document.getElementById('cfgSuccess').classList.add('hidden'), 2000);
-    document.getElementById('cfg_subject').value = '';
-    document.getElementById('cfg_class').value = '';
-    loadExamConfigs();
-  }
-
-  async function loadExamConfigs() {
-    const res = await callApi({ action: 'getAllExamConfigs' });
-    const tbody = document.querySelector('#configTable tbody');
-    tbody.innerHTML = (res.configs || []).map(c => `
-      <tr>
-        <td>${c.Subject}</td>
-        <td>${c.Class || '<span class="muted">all</span>'}</td>
-        <td>${c.QuestionsPerExam}</td>
-        <td>${c.DurationMinutes}</td>
-      </tr>
-    `).join('') || '<tr><td colspan="4" class="muted">No custom settings yet — subjects will use the default (20 questions, 30 minutes) until you set one.</td></tr>';
   }
 </script>
 </body>
