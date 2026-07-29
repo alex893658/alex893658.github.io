@@ -210,7 +210,7 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
     <!-- SETTINGS -->
     <div class="card hidden" id="tab-settings">
       <h2>Exam Settings</h2>
-      <p class="muted">Set how many random questions each exam pulls, the time limit, and — optionally — the date/time it opens, per subject. Leave Class blank to apply to every class taking that subject. Leave "Opens at" blank for no restriction.</p>
+      <p class="muted">Set how many random questions each exam pulls, the time limit, the term, whether it's a test or exam, and — optionally — when it opens and closes, per subject. Leave Class blank to apply to every class taking that subject. Leave start/end blank for no restriction.</p>
       <div class="row2">
         <div>
           <label>Subject</label>
@@ -231,14 +231,41 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
           <input id="cfg_duration" type="number" value="45" min="1">
         </div>
       </div>
-      <label>Opens at (optional)</label>
-      <input id="cfg_opensAt" type="datetime-local">
+      <div class="row2">
+        <div>
+          <label>Term</label>
+          <select id="cfg_term">
+            <option value="">Select term</option>
+            <option value="First Term">First Term</option>
+            <option value="Second Term">Second Term</option>
+            <option value="Third Term">Third Term</option>
+          </select>
+        </div>
+        <div>
+          <label>Type</label>
+          <select id="cfg_testType">
+            <option value="">Select type</option>
+            <option value="Test">Test</option>
+            <option value="Exam">Exam</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Start time (optional)</label>
+          <input id="cfg_opensAt" type="datetime-local">
+        </div>
+        <div>
+          <label>End time (optional)</label>
+          <input id="cfg_closesAt" type="datetime-local">
+        </div>
+      </div>
       <button onclick="saveExamConfig()">Save Setting</button>
       <div class="success hidden" id="cfgSuccess">Saved.</div>
 
       <h2 style="margin-top:24px;">Current Settings</h2>
       <table id="configTable">
-        <thead><tr><th>Subject</th><th>Class</th><th>Questions</th><th>Minutes</th><th>Opens At</th></tr></thead>
+        <thead><tr><th>Subject</th><th>Class</th><th>Term</th><th>Type</th><th>Questions</th><th>Minutes</th><th>Start</th><th>End</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -274,16 +301,26 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
   }
 
   let staffName = '';
+  let loggedInStaffId = '';
+  let loggedInPin = '';
 
   async function teacherLogin() {
     const staffId = document.getElementById('staffId').value.trim();
     const pin = document.getElementById('pin').value;
     const res = await callApi({ action: 'teacherLogin', staffId, pin });
     if (!res.success) {
+      document.getElementById('loginError').textContent = 'Invalid Staff ID or PIN.';
+      document.getElementById('loginError').classList.remove('hidden');
+      return;
+    }
+    if (!res.isExamOfficer) {
+      document.getElementById('loginError').textContent = 'This portal is for exam officers/admins only. Use the Teachers CBT page to add questions.';
       document.getElementById('loginError').classList.remove('hidden');
       return;
     }
     staffName = res.name || staffId;
+    loggedInStaffId = staffId;
+    loggedInPin = pin;
     document.getElementById('loginCard').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     loadDashboard();
@@ -304,7 +341,7 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
   async function loadDashboard() {
     const [qRes, rRes] = await Promise.all([
       callApi({ action: 'getAllQuestions' }),
-      callApi({ action: 'getResults' })
+      callApi({ action: 'getResults', staffId: loggedInStaffId, pin: loggedInPin })
     ]);
     const questions = qRes.questions || [];
     const results = rRes.results || [];
@@ -458,7 +495,7 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
   async function loadResults() {
     const subject = document.getElementById('resultsSubjectFilter').value.trim();
     const className = document.getElementById('resultsClassFilter').value.trim();
-    const res = await callApi({ action: 'getResults', subject, className });
+    const res = await callApi({ action: 'getResults', subject, className, staffId: loggedInStaffId, pin: loggedInPin });
     const tbody = document.querySelector('#resultsTable tbody');
     tbody.innerHTML = res.results.map(r => `
       <tr>
@@ -486,33 +523,51 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
     const className = document.getElementById('cfg_class').value.trim();
     const questionsPerExam = document.getElementById('cfg_questions').value;
     const durationMinutes = document.getElementById('cfg_duration').value;
+    const term = document.getElementById('cfg_term').value;
+    const testType = document.getElementById('cfg_testType').value;
     const opensAtLocal = document.getElementById('cfg_opensAt').value;
+    const closesAtLocal = document.getElementById('cfg_closesAt').value;
     const opensAt = opensAtLocal ? new Date(opensAtLocal).toISOString() : '';
+    const closesAt = closesAtLocal ? new Date(closesAtLocal).toISOString() : '';
     if (!subject || !questionsPerExam || !durationMinutes) {
       alert('Please fill in subject, questions per exam, and duration.');
       return;
     }
-    await callApi({ action: 'setExamConfig', subject, className, questionsPerExam, durationMinutes, opensAt, actor: staffName });
+    if (!term || !testType) {
+      alert('Please select a term and whether this is a test or an exam.');
+      return;
+    }
+    if (opensAt && closesAt && new Date(closesAt) <= new Date(opensAt)) {
+      alert('End time must be after start time.');
+      return;
+    }
+    await callApi({ action: 'setExamConfig', subject, className, questionsPerExam, durationMinutes, opensAt, closesAt, term, testType, actor: staffName, staffId: loggedInStaffId, pin: loggedInPin });
     document.getElementById('cfgSuccess').classList.remove('hidden');
     setTimeout(() => document.getElementById('cfgSuccess').classList.add('hidden'), 2000);
     document.getElementById('cfg_subject').value = '';
     document.getElementById('cfg_class').value = '';
+    document.getElementById('cfg_term').value = '';
+    document.getElementById('cfg_testType').value = '';
     document.getElementById('cfg_opensAt').value = '';
+    document.getElementById('cfg_closesAt').value = '';
     loadExamConfigs();
   }
 
   async function loadExamConfigs() {
-    const res = await callApi({ action: 'getAllExamConfigs' });
+    const res = await callApi({ action: 'getAllExamConfigs', staffId: loggedInStaffId, pin: loggedInPin });
     const tbody = document.querySelector('#configTable tbody');
     tbody.innerHTML = (res.configs || []).map(c => `
       <tr>
         <td>${c.Subject}</td>
         <td>${c.Class || '<span class="muted">all</span>'}</td>
+        <td>${c.Term || '<span class="muted">—</span>'}</td>
+        <td>${c.TestType || '<span class="muted">—</span>'}</td>
         <td>${c.QuestionsPerExam}</td>
         <td>${c.DurationMinutes}</td>
-        <td>${c.OpensAt ? new Date(c.OpensAt).toLocaleString() : '<span class="muted">no restriction</span>'}</td>
+        <td>${c.OpensAt ? new Date(c.OpensAt).toLocaleString() : '<span class="muted">none</span>'}</td>
+        <td>${c.ClosesAt ? new Date(c.ClosesAt).toLocaleString() : '<span class="muted">none</span>'}</td>
       </tr>
-    `).join('') || '<tr><td colspan="5" class="muted">No custom settings yet — subjects will use the default (20 questions, 30 minutes, no time restriction) until you set one.</td></tr>';
+    `).join('') || '<tr><td colspan="8" class="muted">No custom settings yet — subjects will use the default (20 questions, 30 minutes, no time restriction) until you set one.</td></tr>';
   }
 
   async function clearSubmission() {
@@ -524,7 +579,7 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
       alert('Enter both the Student ID and Subject.');
       return;
     }
-    const res = await callApi({ action: 'clearSubmission', studentId, subject, actor: staffName });
+    const res = await callApi({ action: 'clearSubmission', studentId, subject, actor: staffName, staffId: loggedInStaffId, pin: loggedInPin });
     if (res.success) {
       document.getElementById('ovSuccess').classList.remove('hidden');
       document.getElementById('ov_studentId').value = '';
