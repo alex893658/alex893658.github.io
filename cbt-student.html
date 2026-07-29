@@ -227,6 +227,7 @@
       const configRes = await callApi({ action: 'getExamConfig', subject, className: student.className });
       const questionsPerExam = configRes.questionsPerExam || DEFAULT_QUESTIONS_PER_EXAM;
       const durationMinutes = configRes.durationMinutes || DEFAULT_DURATION_MINUTES;
+      const closesAt = configRes.closesAt ? new Date(configRes.closesAt) : null;
 
       const res = await callApi({ action: 'getQuestions', subject, className: student.className, limit: questionsPerExam, studentId: student.studentId });
       showLoading(false);
@@ -264,6 +265,10 @@
       document.getElementById('examStep').classList.remove('hidden');
 
       secondsLeft = durationMinutes * 60;
+      if (closesAt && !isNaN(closesAt.getTime())) {
+        const secondsUntilClose = Math.floor((closesAt.getTime() - Date.now()) / 1000);
+        if (secondsUntilClose < secondsLeft) secondsLeft = Math.max(secondsUntilClose, 0);
+      }
       updateTimerLabel();
       timerInterval = setInterval(() => {
         secondsLeft--;
