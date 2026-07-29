@@ -144,7 +144,7 @@
     <!-- STEP 4: RESULT -->
     <div id="resultStep" class="hidden">
       <div class="score-box">
-        <div class="big" id="scoreBig" style="font-size:2.6rem;">–</div>
+        <div class="big" style="font-size:2.2rem;">Successfully Submitted</div>
         <div class="progress-note" id="scoreDetail"></div>
       </div>
       <button onclick="backToSubjects()">Take Another Subject</button>
@@ -228,11 +228,15 @@
       const questionsPerExam = configRes.questionsPerExam || DEFAULT_QUESTIONS_PER_EXAM;
       const durationMinutes = configRes.durationMinutes || DEFAULT_DURATION_MINUTES;
 
-      const res = await callApi({ action: 'getQuestions', subject, className: student.className, limit: questionsPerExam });
+      const res = await callApi({ action: 'getQuestions', subject, className: student.className, limit: questionsPerExam, studentId: student.studentId });
       showLoading(false);
 
       if (!res.success) {
-        alert('Error loading questions: ' + (res.error || 'unknown error'));
+        if (res.locked) {
+          alert(res.error);
+        } else {
+          alert('Error loading questions: ' + (res.error || 'unknown error'));
+        }
         return;
       }
       if (!res.questions.length) {
@@ -309,8 +313,7 @@
 
       document.getElementById('examStep').classList.add('hidden');
       document.getElementById('resultStep').classList.remove('hidden');
-      document.getElementById('scoreBig').textContent = res.score + ' / ' + res.totalMarks;
-      document.getElementById('scoreDetail').textContent = `${student.subject} — ${res.totalQuestions} questions`;
+      document.getElementById('scoreDetail').textContent = `${res.totalQuestions} questions submitted for ${student.subject}`;
     } catch (err) {
       showLoading(false);
       alert('Connection error while submitting: ' + err.message);
