@@ -177,8 +177,16 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
     <!-- MANAGE QUESTIONS -->
     <div class="card hidden" id="tab-manage">
       <h2>Manage Questions</h2>
-      <label>Filter by subject</label>
-      <input id="manageSubjectFilter" placeholder="Leave blank for all">
+      <div class="row2">
+        <div>
+          <label>Filter by subject</label>
+          <input id="manageSubjectFilter" placeholder="Leave blank for all">
+        </div>
+        <div>
+          <label>Filter by class</label>
+          <input id="manageClassFilter" placeholder="e.g. JSS2 — leave blank for all">
+        </div>
+      </div>
       <button onclick="loadQuestions()">Load</button>
       <table id="questionsTable">
         <thead><tr><th>Subject</th><th>Class</th><th>Question</th><th>Answer</th><th></th></tr></thead>
@@ -473,7 +481,8 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
 
   async function loadQuestions() {
     const subject = document.getElementById('manageSubjectFilter').value.trim();
-    const res = await callApi({ action: 'getAllQuestions', subject });
+    const className = document.getElementById('manageClassFilter').value.trim();
+    const res = await callApi({ action: 'getAllQuestions', subject, className });
     const tbody = document.querySelector('#questionsTable tbody');
     tbody.innerHTML = res.questions.map(q => `
       <tr>
