@@ -457,13 +457,7 @@ async function loadStudentFees(){
       area.textContent = data.message || 'No fee record yet. Please contact the bursar.';
       return;
     }
-    const s = data.student;
-    let html = `
-      <div class="finance-summary">
-        <div class="finance-card"><div class="lbl">Total Owed</div><div class="amt">${naira(s.termFees)}</div></div>
-        <div class="finance-card"><div class="lbl">Total Paid</div><div class="amt">${naira(s.totalPaid)}</div></div>
-        <div class="finance-card ${Number(s.balance)>0?'warn':''}"><div class="lbl">Balance</div><div class="amt">${naira(s.balance)}</div></div>
-      </div>`;
+    let html = '';
 
     if(data.items && data.items.length){
       // Sum this student's confirmed payments per fee item name, so each
