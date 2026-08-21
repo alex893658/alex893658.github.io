@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,6 +97,28 @@ tr:last-child td{border-bottom:none;}
 .badge-paid{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#E6F5EA;color:var(--green-deep);}
 .badge-pending{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#FFF3E0;color:#B36B00;}
 .badge-rejected{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#FBE4E0;color:var(--flame);}
+.fee-accordion{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:18px;}
+.fee-row{border-bottom:1px solid var(--line);}
+.fee-row:last-child{border-bottom:none;}
+.fee-row-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer;background:#fff;transition:background .15s ease;}
+.fee-row-head:hover{background:#FBF8F2;}
+.fee-row-head .fee-name{font-weight:700;color:var(--navy);font-size:0.96rem;}
+.fee-row-head .fee-term{display:block;font-size:0.78rem;color:#5A5D68;font-weight:500;margin-top:2px;}
+.fee-row-right{display:flex;align-items:center;gap:12px;}
+.fee-row-right .fee-amt{font-weight:700;color:var(--navy);}
+.fee-row-right .fee-owe{font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:999px;background:#FBE4E0;color:var(--flame);}
+.fee-row-right .fee-owe.clear{background:#E6F5EA;color:var(--green-deep);}
+.fee-chevron{transition:transform .2s ease;color:#5A5D68;font-size:0.8rem;}
+.fee-row.open .fee-chevron{transform:rotate(180deg);}
+.fee-row-body{max-height:0;overflow:hidden;transition:max-height .25s ease;background:#FBF8F2;}
+.fee-row.open .fee-row-body{max-height:520px;}
+.fee-row-body-inner{padding:6px 18px 20px;}
+.fee-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-bottom:14px;}
+@media(max-width:480px){.fee-detail-grid{grid-template-columns:1fr;}}
+.fee-detail-item .lbl{font-size:0.72rem;font-weight:600;color:#5A5D68;text-transform:uppercase;}
+.fee-detail-item .val{font-weight:700;color:var(--navy);margin-top:2px;font-size:0.94rem;}
+.fee-pay-note{font-size:0.82rem;color:#5A5D68;margin-bottom:12px;}
+.fee-row-body .btn{width:auto;padding:9px 18px;font-size:0.85rem;}
 </style>
 </head>
 <body>
@@ -184,7 +207,7 @@ tr:last-child td{border-bottom:none;}
 </div>
 <div class="subpanel" id="student-fees">
 <div id="studentFeesArea" class="loading">Loading fee information...</div>
-<div class="card" style="margin-top:20px;">
+<div class="card" style="margin-top:20px;" id="feeReceiptUploadCard">
 <h3 style="font-size:0.98rem;margin-bottom:14px;">Upload Payment Receipt</h3>
 <div class="field">
 <label for="receiptFeeItem">Fee Item</label>
@@ -443,24 +466,52 @@ async function loadStudentFees(){
       </div>`;
 
     if(data.items && data.items.length){
-      html += '<h3 style="font-size:0.95rem;margin:18px 0 10px">Fee Breakdown</h3>';
-      html += '<table><thead><tr><th>Fee</th><th>Term</th><th>Amount</th></tr></thead><tbody>';
-      data.items.forEach(i=>{
-        html += `<tr><td>${i.name}</td><td>${i.term}</td><td>${naira(i.amount)}</td></tr>`;
+      // Sum this student's confirmed payments per fee item name, so each
+      // line can show what's still owed on that specific fee (not just the
+      // overall balance).
+      const paidByItem = {};
+      (data.payments || []).forEach(p=>{
+        const key = p.feeItem || 'General Payment';
+        paidByItem[key] = (paidByItem[key] || 0) + (Number(p.amount) || 0);
       });
-      html += '</tbody></table>';
-    }
 
-    const ps = data.paymentSettings || {};
-    if(ps.accountNumber){
-      html += `
-        <h3 style="font-size:0.95rem;margin:18px 0 10px">Where to Pay</h3>
-        <div class="finance-card" style="max-width:360px">
-          <div class="lbl">Bank</div><div style="font-weight:700;margin-bottom:8px">${ps.bankName||'—'}</div>
-          <div class="lbl">Account Name</div><div style="font-weight:700;margin-bottom:8px">${ps.accountName||'—'}</div>
-          <div class="lbl">Account Number</div><div style="font-weight:700;margin-bottom:8px">${ps.accountNumber||'—'}</div>
-          ${ps.instructions ? `<p style="font-size:0.82rem;color:#5A5D68;margin-top:6px">${ps.instructions}</p>` : ''}
-        </div>`;
+      html += '<h3 style="font-size:0.95rem;margin:18px 0 10px">Fee Breakdown</h3>';
+      html += '<div class="fee-accordion">';
+      data.items.forEach((i, idx)=>{
+        const paid = paidByItem[i.name] || 0;
+        const owing = Math.max(0, (Number(i.amount) || 0) - paid);
+        const rowId = 'feeRow' + idx;
+        html += `
+          <div class="fee-row" id="${rowId}">
+            <div class="fee-row-head" onclick="toggleFeeRow('${rowId}')">
+              <div>
+                <span class="fee-name">${i.name}</span>
+                <span class="fee-term">${i.term || 'All Terms'}</span>
+              </div>
+              <div class="fee-row-right">
+                <span class="fee-owe ${owing<=0?'clear':''}">${owing<=0?'Fully Paid':'Owing ' + naira(owing)}</span>
+                <span class="fee-amt">${naira(i.amount)}</span>
+                <span class="fee-chevron">&#9660;</span>
+              </div>
+            </div>
+            <div class="fee-row-body">
+              <div class="fee-row-body-inner">
+                <div class="fee-detail-grid">
+                  <div class="fee-detail-item"><div class="lbl">Amount</div><div class="val">${naira(i.amount)}</div></div>
+                  <div class="fee-detail-item"><div class="lbl">Amount Owing</div><div class="val">${naira(owing)}</div></div>
+                  <div class="fee-detail-item"><div class="lbl">Term</div><div class="val">${i.term || 'All Terms'}</div></div>
+                  <div class="fee-detail-item"><div class="lbl">Pay Into</div><div class="val">${i.accountLabel || 'General Account'}</div></div>
+                </div>
+                <p class="fee-pay-note">
+                  <strong>${i.bankName || '—'}</strong> · ${i.accountName || '—'} · ${i.accountNumber || '—'}
+                  ${i.payInstructions ? '<br>' + i.payInstructions : ''}
+                </p>
+                <button class="btn secondary" onclick="startReceiptFor('${i.name.replace(/'/g,"\\'")}')">Drop Payment Receipt</button>
+              </div>
+            </div>
+          </div>`;
+      });
+      html += '</div>';
     }
 
     html += '<h3 style="font-size:0.95rem;margin:18px 0 10px">Payment History</h3>';
@@ -484,6 +535,21 @@ async function loadStudentFees(){
     area.className='empty'; area.textContent='Finance service unavailable. Contact the school bursar.';
   }
 }
+
+window.toggleFeeRow = (rowId)=>{
+  const row = document.getElementById(rowId);
+  if(!row) return;
+  const wasOpen = row.classList.contains('open');
+  document.querySelectorAll('.fee-row.open').forEach(r=>r.classList.remove('open'));
+  if(!wasOpen) row.classList.add('open');
+};
+
+window.startReceiptFor = (feeItemName)=>{
+  const select = document.getElementById('receiptFeeItem');
+  if(select) select.value = feeItemName;
+  const card = document.getElementById('feeReceiptUploadCard');
+  if(card) card.scrollIntoView({ behavior:'smooth', block:'start' });
+};
 
 function receiptBadge(status){
   const s = String(status||'').toLowerCase();
@@ -589,42 +655,19 @@ window.printReceipt = (receiptNo)=>{
 
 async function loadStudentOverview(){
   const area = document.getElementById('studentOverviewArea');
-  area.className='loading'; area.textContent='Loading overview...';
-  try{
-    const [notesData, feesData] = await Promise.all([
-      apiCall({action:'getNotes', className: currentStudent.className}),
-      financeCall({action:'studentFees', admissionNo: currentStudent.admissionNo})
-    ]);
-
-    let balanceHtml = '<p class="empty">Fee information unavailable.</p>';
-    if(feesData && feesData.success && feesData.student){
-      const s = feesData.student;
-      balanceHtml = `
-        <div class="finance-summary">
-          <div class="finance-card"><div class="lbl">Total Owed</div><div class="amt">${naira(s.termFees)}</div></div>
-          <div class="finance-card"><div class="lbl">Total Paid</div><div class="amt">${naira(s.totalPaid)}</div></div>
-          <div class="finance-card ${Number(s.balance)>0?'warn':''}"><div class="lbl">Balance</div><div class="amt">${naira(s.balance)}</div></div>
-        </div>`;
-    } else if(feesData && feesData.message){
-      balanceHtml = `<p class="empty">${feesData.message}</p>`;
-    }
-
-    let noteHtml = '<p class="empty">No notes posted for your class yet.</p>';
-    if(notesData && notesData.success && notesData.notes && notesData.notes.length){
-      const n = notesData.notes[0];
-      noteHtml = `<div class="finance-card"><div class="lbl">${n.subject} · ${n.date}</div><div style="font-weight:700;margin-top:4px">${n.title}</div></div>`;
-    }
-
-    area.className = '';
-    area.innerHTML = `
-      <h3 style="font-size:0.95rem;margin-bottom:10px">School Fees</h3>
-      ${balanceHtml}
-      <h3 style="font-size:0.95rem;margin:20px 0 10px">Latest Note</h3>
-      ${noteHtml}
-    `;
-  } catch(e){
-    area.className='empty'; area.textContent='Could not load overview right now.';
-  }
+  area.className='';
+  area.innerHTML = `
+    <div class="card">
+      <div class="fee-detail-item" style="margin-bottom:14px">
+        <div class="lbl">Name</div>
+        <div class="val" style="font-size:1.15rem">${currentStudent.name || '—'}</div>
+      </div>
+      <div class="fee-detail-item">
+        <div class="lbl">Class</div>
+        <div class="val" style="font-size:1.15rem">${currentStudent.studentClass || '—'}</div>
+      </div>
+    </div>
+  `;
 }
 
 async function loadStaffPayslips(){
@@ -787,3 +830,4 @@ async function submitClassSheet(className, term){
 </script>
 </body>
 </html>
+Displaying tddc-portal-24.html.
