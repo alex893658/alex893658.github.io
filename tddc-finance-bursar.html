@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<style>html{color-scheme:light only;}</style>
   <title>School Fees — TDDC Schools & College</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -111,6 +113,8 @@
 
     <div class="tabs">
       <button class="tab active" data-tab="payments">Fee Payments</button>
+      <button class="tab" data-tab="income">Other Income</button>
+      <button class="tab" data-tab="expenses">Expenses</button>
       <button class="tab" data-tab="receipts">Pending Receipts</button>
       <button class="tab" data-tab="feeitems">Fee Structure</button>
       <button class="tab" data-tab="students">Students</button>
@@ -190,6 +194,59 @@
           <div class="table-wrap"><table>
             <thead><tr><th>Name</th><th>Amount</th><th>Class</th><th>Term</th><th>Account</th><th>Status</th><th></th></tr></thead>
             <tbody id="feeItemsTable"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OTHER INCOME -->
+    <div class="panel" id="panel-income">
+      <div class="section-split">
+        <div>
+          <h2>Record Other Income</h2>
+          <p class="status">Money received that is not school fees.</p>
+          <div class="field"><label>Source</label>
+            <select id="incSource"><option>Uniform sales</option><option>Books &amp; stationery</option><option>Registration / form</option><option>Exam or levy</option><option>Donation</option><option>Other</option></select></div>
+          <div class="field"><label>Description</label><textarea id="incDesc"></textarea></div>
+          <div class="row2">
+            <div class="field"><label>Amount (₦)</label><input type="number" id="incAmount"></div>
+            <div class="field"><label>Method</label><select id="incMethod"><option>Cash</option><option>Bank Transfer</option><option>POS</option></select></div>
+          </div>
+          <div class="field"><label>Received from</label><input id="incFrom"></div>
+          <button class="btn" id="addIncomeBtn">Record Income</button>
+          <div class="status" id="incMsg"></div>
+        </div>
+        <div>
+          <h2>Recent Other Income</h2>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Source</th><th>Amount</th><th>From</th><th>Date</th></tr></thead>
+            <tbody id="incomeTable"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPENSES -->
+    <div class="panel" id="panel-expenses">
+      <div class="section-split">
+        <div>
+          <h2>Log Expense</h2>
+          <p class="status">The director approves expenses after you log them.</p>
+          <div class="field"><label>Category</label>
+            <select id="expCategory"><option>Utilities</option><option>Maintenance</option><option>Supplies</option><option>Transport</option><option>Events</option><option>Salaries (other)</option><option>Other</option></select></div>
+          <div class="field"><label>Description</label><textarea id="expDesc"></textarea></div>
+          <div class="row2">
+            <div class="field"><label>Amount (₦)</label><input type="number" id="expAmount"></div>
+            <div class="field"><label>Vendor</label><input id="expVendor"></div>
+          </div>
+          <button class="btn" id="addExpenseBtn">Log Expense</button>
+          <div class="status" id="expenseMsg"></div>
+        </div>
+        <div>
+          <h2>Recent Expenses</h2>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Category</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="expensesTable"></tbody>
           </table></div>
         </div>
       </div>
@@ -285,7 +342,7 @@ document.querySelectorAll('.tab').forEach(t=>{
 
 async function loadAll(){
   await loadAccounts();
-  await Promise.all([loadFeeItems(), loadStudents(), loadFeePayments(), loadReceipts()]);
+  await Promise.all([loadFeeItems(), loadStudents(), loadFeePayments(), loadReceipts(), loadIncome(), loadExpenses()]);
 }
 
 function accountLabel(accountId){
@@ -393,6 +450,35 @@ document.getElementById('addStudentBtn').addEventListener('click', async ()=>{
     loadStudents();
   }
 });
+
+function say(el, ok, msg){ el.className = ok ? 'status ok' : 'status err'; el.textContent = msg || 'Something went wrong. Please try again.'; }
+
+async function loadIncome(){
+  const d = await api({action:'listIncome'});
+  if(!d.success) return;
+  document.getElementById('incomeTable').innerHTML = (d.income||[]).slice(0,20).map(r=>
+    `<tr><td>${esc(r.source)}</td><td>${naira(r.amount)}</td><td>${esc(r.receivedFrom)||'—'}</td><td>${esc(String(r.date||'').slice(0,10))}</td></tr>`
+  ).join('') || '<tr><td colspan="4" class="empty">Nothing recorded yet</td></tr>';
+}
+document.getElementById('addIncomeBtn').addEventListener('click', async ()=>{
+  const d = await api({action:'addIncome', source:incSource.value, description:incDesc.value, amount:incAmount.value, method:incMethod.value, receivedFrom:incFrom.value});
+  say(document.getElementById('incMsg'), d.success, d.message);
+  if(d.success){ loadIncome(); incDesc.value=''; incAmount.value=''; incFrom.value=''; }
+});
+
+async function loadExpenses(){
+  const d = await api({action:'listExpenses'});
+  if(!d.success) return;
+  document.getElementById('expensesTable').innerHTML = (d.expenses||[]).slice(0,20).map(r=>
+    `<tr><td>${esc(r.category)}</td><td>${naira(r.amount)}</td><td>${badge(r.status)}</td><td>${esc(String(r.date||'').slice(0,10))}</td></tr>`
+  ).join('') || '<tr><td colspan="4" class="empty">No expenses yet</td></tr>';
+}
+document.getElementById('addExpenseBtn').addEventListener('click', async ()=>{
+  const d = await api({action:'addExpense', category:expCategory.value, description:expDesc.value, amount:expAmount.value, vendor:expVendor.value});
+  say(document.getElementById('expenseMsg'), d.success, d.message);
+  if(d.success){ loadExpenses(); expDesc.value=''; expAmount.value=''; expVendor.value=''; }
+});
+
 
 async function loadFeePayments(){
   const data = await api({action:'listFeePayments'});

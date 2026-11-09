@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<style>html{color-scheme:light only;}</style>
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex, nofollow">
@@ -144,6 +146,7 @@
       <button type="button" class="tab" data-tab="fees">School Fees</button>
       <button type="button" class="tab" data-tab="feeitems">Fee Structure</button>
       <button type="button" class="tab" data-tab="accounts">Accounts</button>
+      <button type="button" class="tab" data-tab="daily">Daily Summary</button>
       <button type="button" class="tab" data-tab="expenses">Expenses</button>
       <button type="button" class="tab" data-tab="budgets">Budgets</button>
       <button type="button" class="tab" data-tab="settings">Settings</button>
@@ -357,6 +360,14 @@
     </div>
 
     <!-- EXPENSES -->
+    <div class="panel" id="panel-daily">
+      <h2>Daily Summary</h2>
+      <p class="status">Pick a date to see everything received and spent that day.</p>
+      <div class="row2"><div class="field"><label>Date</label><input type="date" id="dailyDate"></div>
+      <div class="field"><label>&nbsp;</label><button type="button" class="btn" id="dailyBtn">Show</button></div></div>
+      <div id="dailyArea" class="status"></div>
+    </div>
+
     <div class="panel" id="panel-expenses">
       <div class="section-split">
         <div>
@@ -552,7 +563,7 @@ async function loadDashboard(){
   $('kpiPayroll').textContent = naira(s.totalPayroll);
   $('kpiExpenses').textContent = naira(s.totalExpenses);
   $('kpiOutstanding').textContent = naira(s.outstandingFees);
-  $('kpiNet').textContent = 'Net position: ' + naira(s.netPosition) + ' · ' + s.activeStaff + ' active staff';
+  $('kpiNet').textContent = 'Other income: ' + naira(s.totalOtherIncome) + ' · Net position: ' + naira(s.netPosition) + ' · ' + s.activeStaff + ' active staff';
   $('recentFees').innerHTML = (data.recentFees || []).map(r =>
     '<tr><td>'+esc(r.studentName)+'</td><td>'+esc(naira(r.amount))+'</td><td>'+esc(r.date)+'</td></tr>').join('') || '<tr><td colspan="3" class="empty">No payments yet</td></tr>';
   $('recentPayroll').innerHTML = (data.recentPayroll || []).map(r =>
@@ -707,6 +718,28 @@ $('addStudentBtn').addEventListener('click', e => withBtn(e.currentTarget, async
   say($('studentMsg'), d.success, d.message);
   if(d.success){ ['newAdmNo','newStuName','newStuClass'].forEach(id => { $(id).value = ''; }); loadStudents(); }
 }));
+
+
+$('dailyDate').value = new Date().toLocaleDateString('en-CA');
+async function loadDaily(){
+  const area = $('dailyArea');
+  area.className = 'status'; area.textContent = 'Loading...';
+  const d = await api({action:'dailySummary', date: $('dailyDate').value});
+  if(!d.success){ say(area, false, d.message || 'Could not load.'); return; }
+  const t = d.totals;
+  const rows = (list, f) => list.map(f).join('') || '<tr><td colspan="3" class="empty">None</td></tr>';
+  area.className = '';
+  area.innerHTML =
+    '<div class="kpis">' +
+    '<div class="kpi"><div class="label">Total received</div><div class="value">'+esc(naira(t.received))+'</div><div class="sub">Fees '+esc(naira(t.fees))+' · Other '+esc(naira(t.otherIncome))+'</div></div>' +
+    '<div class="kpi"><div class="label">Total expenses</div><div class="value">'+esc(naira(t.expenses))+'</div></div>' +
+    '<div class="kpi"><div class="label">Net for the day</div><div class="value">'+esc(naira(t.net))+'</div></div></div>' +
+    '<h3>Fees received</h3><div class="table-wrap"><table><tbody>'+rows(d.fees, r=>'<tr><td>'+esc(r.studentName)+'</td><td>'+esc(naira(r.amount))+'</td><td>'+esc(r.method)+'</td></tr>')+'</tbody></table></div>' +
+    '<h3>Other income</h3><div class="table-wrap"><table><tbody>'+rows(d.income, r=>'<tr><td>'+esc(r.source)+'</td><td>'+esc(naira(r.amount))+'</td><td>'+esc(r.method)+'</td></tr>')+'</tbody></table></div>' +
+    '<h3>Expenses</h3><div class="table-wrap"><table><tbody>'+rows(d.expenses, r=>'<tr><td>'+esc(r.category)+'</td><td>'+esc(naira(r.amount))+'</td><td>'+esc(r.status)+'</td></tr>')+'</tbody></table></div>';
+}
+$('dailyBtn').addEventListener('click', loadDaily);
+document.querySelector('.tab[data-tab="daily"]').addEventListener('click', loadDaily);
 
 async function loadExpenses(){
   const data = await api({action:'listExpenses'});
