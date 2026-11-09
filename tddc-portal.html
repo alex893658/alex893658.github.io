@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<style>html{color-scheme:light only;}</style>
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
@@ -67,6 +69,9 @@ main{max-width:640px;margin:0 auto;padding:50px 24px 80px;}
 .subtabs{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
 .subtab{padding:9px 16px;border-radius:8px;font-size:0.86rem;font-weight:600;background:#fff;border:1px solid var(--line);color:var(--navy);cursor:pointer;}
 .subtab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+#student-overview .card{position:relative;overflow:hidden;background:#fff;}
+#student-overview .card::before{content:"";position:absolute;inset:0;background:url(tddc-logo.png) center/70% no-repeat;opacity:0.10;pointer-events:none;}
+#student-overview .card>*{position:relative;}
 .subpanel{display:none;}
 .subpanel.active{display:block;}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);}
