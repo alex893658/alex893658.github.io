@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>School Fees — TDDC Schools & College</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -120,7 +121,10 @@
       <div class="section-split">
         <div>
           <h2>Record Fee Payment</h2>
-          <div class="field"><label>Student</label><select id="feeStudent"></select></div>
+          <div class="field"><label>Class</label><select id="feeClass"></select></div>
+          <div class="field"><label>Student</label>
+            <input id="studentSearch" placeholder="Type a name or admission number to search" style="margin-bottom:8px" autocomplete="off">
+            <select id="feeStudent"></select></div>
           <div class="row2">
             <div class="field"><label>Amount (₦)</label><input type="number" id="feeAmount"></div>
             <div class="field"><label>Term</label>
@@ -130,7 +134,7 @@
           <div class="row2">
             <div class="field"><label>Fee Item</label><select id="feeItemSelect"></select></div>
             <div class="field"><label>Method</label>
-              <select id="feeMethod"><option>Cash</option><option>Bank Transfer</option><option>POS</option><option>Cheque</option></select>
+              <select id="feeMethod"><option>Cash</option><option>Bank Transfer</option><option>POS</option></select>
             </div>
           </div>
           <button class="btn" id="addFeeBtn">Record Payment</button>
@@ -218,28 +222,32 @@
 // ==== Same Finance Apps Script Web App URL as the finance dashboard ====
 const FINANCE_API = "https://script.google.com/macros/s/AKfycbwccxwVk5m2pitZhhZ5xxB1rw7SjHJhA03Iw8fLoS29L3N1SFPgUz0fMxUEjDhz9Uelrw/exec";
 
-let adminPin = '';
+let token = '';
 let accountsCache = [];
+let studentsCache = [];
 
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function safeUrl(u){ u = String(u||''); return /^https:\/\//i.test(u) ? esc(u) : ''; }
 function naira(n){ return '₦' + Number(n||0).toLocaleString('en-NG'); }
 function badge(status){
   const s = String(status||'').toLowerCase();
   const cls = (s==='paid'||s==='approved') ? 'paid' : 'pending';
-  return `<span class="badge ${cls}">${status||'—'}</span>`;
+  return `<span class="badge ${cls}">${esc(status)||'—'}</span>`;
 }
 
-async function api(params, method='GET'){
-  if(method === 'POST'){
-    const res = await fetch(FINANCE_API, {
-      method:'POST',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify(Object.assign({adminPin}, params))
-    });
-    return res.json();
+async function api(params){
+  const res = await fetch(FINANCE_API, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(Object.assign({token}, params))
+  });
+  const data = await res.json();
+  if(data && data.code === 'AUTH' && token){
+    token = '';
+    alert('Your session ended. Please log in again.');
+    location.reload();
   }
-  const url = FINANCE_API + '?' + new URLSearchParams(Object.assign({adminPin}, params));
-  const res = await fetch(url);
-  return res.json();
+  return data;
 }
 
 document.getElementById('loginBtn').addEventListener('click', async ()=>{
@@ -247,20 +255,20 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
   const msg = document.getElementById('loginMsg');
   if(!pin){ msg.className='status err'; msg.textContent='Enter your PIN.'; return; }
   msg.className='status'; msg.textContent='Checking...';
-  const data = await api({action:'bursarLogin', adminPin: pin});
+  const data = await api({action:'bursarLogin', pin});
   if(data.success){
-    adminPin = pin;
+    token = data.token;
     document.getElementById('welcomeMsg').textContent = 'Welcome, ' + (data.name || 'Staff') + ' — TDDC Schools & College';
     document.getElementById('loginView').style.display='none';
     document.getElementById('appView').style.display='block';
     loadAll();
   } else {
-    msg.className='status err'; msg.textContent = data.message;
+    msg.className='status err'; msg.textContent = data.message || data.error || 'Login failed.';
   }
 });
 
 document.getElementById('logoutBtn').addEventListener('click', ()=>{
-  adminPin = '';
+  token = '';
   document.getElementById('appView').style.display='none';
   document.getElementById('loginView').style.display='flex';
   document.getElementById('staffPin').value = '';
@@ -282,7 +290,7 @@ async function loadAll(){
 
 function accountLabel(accountId){
   const a = accountsCache.find(x=>x.accountId===accountId);
-  return a ? a.name : '—';
+  return a ? esc(a.name) : '—';
 }
 
 async function loadAccounts(){
@@ -290,7 +298,7 @@ async function loadAccounts(){
   if(!data.success) return;
   accountsCache = data.accounts || [];
   document.getElementById('fiAccount').innerHTML = accountsCache.length
-    ? accountsCache.map(a=>`<option value="${a.accountId}">${a.name}</option>`).join('')
+    ? accountsCache.map(a=>`<option value="${esc(a.accountId)}">${esc(a.name)}</option>`).join('')
     : '<option value="">No accounts set up yet</option>';
 }
 
@@ -300,20 +308,20 @@ async function loadFeeItems(){
   const items = data.feeItems || [];
   document.getElementById('feeItemsTable').innerHTML = items.map(i=>`
     <tr>
-      <td>${i.name}</td><td>${naira(i.amount)}</td><td>${i.className}</td><td>${i.term}</td>
+      <td>${esc(i.name)}</td><td>${naira(i.amount)}</td><td>${esc(i.className)}</td><td>${esc(i.term)}</td>
       <td>${accountLabel(i.accountId)}</td>
       <td>${badge(i.status)}</td>
-      <td><button class="btn small secondary" onclick="toggleFeeItem('${i.feeItemId}','${i.status}')">${String(i.status).toLowerCase()==='active'?'Deactivate':'Activate'}</button></td>
+      <td><button class="btn small secondary" data-id="${esc(i.feeItemId)}" data-status="${esc(i.status)}" onclick="toggleFeeItem(this.dataset.id,this.dataset.status)">${String(i.status).toLowerCase()==='active'?'Deactivate':'Activate'}</button></td>
     </tr>`).join('') || '<tr><td colspan="7" class="empty">No fee items yet</td></tr>';
 
   document.getElementById('feeItemSelect').innerHTML =
     '<option value="General Payment">General Payment</option>' +
-    items.map(i=>`<option value="${i.name}">${i.name}</option>`).join('');
+    items.map(i=>`<option value="${esc(i.name)}">${esc(i.name)}</option>`).join('');
 }
 
 window.toggleFeeItem = async (feeItemId, currentStatus)=>{
   const newStatus = String(currentStatus).toLowerCase()==='active' ? 'inactive' : 'active';
-  const data = await api({action:'updateFeeItem', feeItemId, status:newStatus}, 'POST');
+  const data = await api({action:'updateFeeItem', feeItemId, status:newStatus});
   if(data.success){ loadFeeItems(); loadStudents(); }
 };
 
@@ -326,9 +334,9 @@ document.getElementById('addFeeItemBtn').addEventListener('click', async ()=>{
     className: document.getElementById('fiClass').value.trim() || 'All',
     term: document.getElementById('fiTerm').value,
     accountId: document.getElementById('fiAccount').value
-  }, 'POST');
+  });
   msg.className = data.success ? 'status ok' : 'status err';
-  msg.textContent = data.message;
+  msg.textContent = data.message || data.error || 'Something went wrong. Please try again.';
   if(data.success){
     ['fiName','fiAmount','fiClass'].forEach(id=>document.getElementById(id).value='');
     loadFeeItems(); loadStudents();
@@ -340,13 +348,35 @@ async function loadStudents(){
   if(!data.success) return;
   const students = data.students || [];
   document.getElementById('studentsTable').innerHTML = students.map(s=>
-    `<tr><td>${s.admissionNo}</td><td>${s.fullName}</td><td>${s.studentClass}</td><td>${naira(s.balance)}</td></tr>`
+    `<tr><td>${esc(s.admissionNo)}</td><td>${esc(s.fullName)}</td><td>${esc(s.studentClass)}</td><td>${naira(s.balance)}</td></tr>`
   ).join('') || '<tr><td colspan="4" class="empty">No students yet</td></tr>';
 
-  document.getElementById('feeStudent').innerHTML = students.map(s=>
-    `<option value="${s.admissionNo}">${s.fullName} (${s.admissionNo})</option>`
-  ).join('');
+  studentsCache = students;
+  renderClassPicker();
+  renderStudentPicker();
 }
+
+function renderClassPicker(){
+  const sel = document.getElementById('feeClass');
+  const keep = sel.value;
+  const classes = [...new Set(studentsCache.map(s => String(s.studentClass || '').trim()).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">All classes</option>' + classes.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  if (keep && classes.includes(keep)) sel.value = keep;
+}
+
+function renderStudentPicker(){
+  const q = (document.getElementById('studentSearch').value || '').trim().toLowerCase();
+  const cls = document.getElementById('feeClass').value;
+  const list = studentsCache.filter(s => (!cls || String(s.studentClass || '').trim() === cls) && (!q || String(s.fullName).toLowerCase().includes(q) || String(s.admissionNo).toLowerCase().includes(q)));
+  const sel = document.getElementById('feeStudent');
+  const keep = sel.value;
+  sel.innerHTML = list.map(s=>
+    `<option value="${esc(s.admissionNo)}">${esc(s.fullName)} (${esc(s.admissionNo)})</option>`
+  ).join('') || '<option value="">No match</option>';
+  if (keep && list.some(s => String(s.admissionNo) === keep)) sel.value = keep;
+}
+document.getElementById('studentSearch').addEventListener('input', renderStudentPicker);
+document.getElementById('feeClass').addEventListener('change', renderStudentPicker);
 
 document.getElementById('addStudentBtn').addEventListener('click', async ()=>{
   const msg = document.getElementById('studentMsg');
@@ -355,9 +385,9 @@ document.getElementById('addStudentBtn').addEventListener('click', async ()=>{
     admissionNo: document.getElementById('newAdmNo').value.trim(),
     fullName: document.getElementById('newStuName').value.trim(),
     studentClass: document.getElementById('newStuClass').value.trim()
-  }, 'POST');
+  });
   msg.className = data.success ? 'status ok' : 'status err';
-  msg.textContent = data.message;
+  msg.textContent = data.message || data.error || 'Something went wrong. Please try again.';
   if(data.success){
     ['newAdmNo','newStuName','newStuClass'].forEach(id=>document.getElementById(id).value='');
     loadStudents();
@@ -367,8 +397,8 @@ document.getElementById('addStudentBtn').addEventListener('click', async ()=>{
 async function loadFeePayments(){
   const data = await api({action:'listFeePayments'});
   if(!data.success) return;
-  document.getElementById('feePaymentsTable').innerHTML = (data.payments||[]).map(p=>
-    `<tr><td>${p.studentName}</td><td>${naira(p.amount)}</td><td>${p.feeItem||'—'}</td><td>${p.receiptNo||'—'}</td><td>${p.date}</td></tr>`
+  document.getElementById('feePaymentsTable').innerHTML = (data.payments||[]).slice(0,20).map(p=>
+    `<tr><td>${esc(p.studentName)}</td><td>${naira(p.amount)}</td><td>${esc(p.feeItem)||'—'}</td><td>${esc(p.receiptNo)||'—'}</td><td>${esc(String(p.date||'').slice(0,10))}</td></tr>`
   ).join('') || '<tr><td colspan="5" class="empty">No payments yet</td></tr>';
 }
 
@@ -381,9 +411,9 @@ document.getElementById('addFeeBtn').addEventListener('click', async ()=>{
     term: document.getElementById('feeTerm').value,
     method: document.getElementById('feeMethod').value,
     feeItem: document.getElementById('feeItemSelect').value
-  }, 'POST');
+  });
   msg.className = data.success ? 'status ok' : 'status err';
-  msg.textContent = data.message;
+  msg.textContent = data.message || data.error || 'Something went wrong. Please try again.';
   if(data.success){ loadStudents(); loadFeePayments(); document.getElementById('feeAmount').value=''; }
 });
 
@@ -393,11 +423,11 @@ async function loadReceipts(){
   const rows = data.submissions || [];
   document.getElementById('receiptsTable').innerHTML = rows.map(r=>`
     <tr>
-      <td>${r.submittedDate}</td><td>${r.studentName}</td><td>${r.feeItemName}</td><td>${naira(r.amount)}</td>
-      <td><a href="${r.fileUrl}" target="_blank" rel="noopener">View</a></td>
+      <td>${esc(String(r.submittedDate||'').slice(0,10))}</td><td>${esc(r.studentName)}</td><td>${esc(r.feeItemName)}</td><td>${naira(r.amount)}</td>
+      <td>${safeUrl(r.fileUrl) ? `<a href="${safeUrl(r.fileUrl)}" target="_blank" rel="noopener noreferrer">View</a>` : '—'}</td>
       <td>
-        <button class="btn small" onclick="confirmReceipt('${r.submissionId}')">Confirm</button>
-        <button class="btn small secondary" onclick="rejectReceipt('${r.submissionId}')">Reject</button>
+        <button class="btn small" data-id="${esc(r.submissionId)}" onclick="confirmReceipt(this.dataset.id)">Confirm</button>
+        <button class="btn small secondary" data-id="${esc(r.submissionId)}" onclick="rejectReceipt(this.dataset.id)">Reject</button>
       </td>
     </tr>`).join('') || '<tr><td colspan="6" class="empty">No pending receipts</td></tr>';
 
@@ -406,19 +436,20 @@ async function loadReceipts(){
 }
 
 window.confirmReceipt = async (submissionId)=>{
+  if(!confirm('Confirm this receipt? This records the payment and cannot be undone here.')) return;
   const msg = document.getElementById('receiptsMsg');
-  const data = await api({action:'confirmReceipt', submissionId, reviewedBy: 'Bursar'}, 'POST');
+  const data = await api({action:'confirmReceipt', submissionId});
   msg.className = data.success ? 'status ok' : 'status err';
-  msg.textContent = data.message;
+  msg.textContent = data.message || data.error || 'Something went wrong. Please try again.';
   if(data.success){ loadReceipts(); loadStudents(); loadFeePayments(); }
 };
 
 window.rejectReceipt = async (submissionId)=>{
   const note = prompt('Reason for rejecting this receipt (optional):') || '';
   const msg = document.getElementById('receiptsMsg');
-  const data = await api({action:'rejectReceipt', submissionId, reviewedBy: 'Bursar', reviewNote: note}, 'POST');
+  const data = await api({action:'rejectReceipt', submissionId, reviewNote: note});
   msg.className = data.success ? 'status ok' : 'status err';
-  msg.textContent = data.message;
+  msg.textContent = data.message || data.error || 'Something went wrong. Please try again.';
   if(data.success) loadReceipts();
 };
 </script>

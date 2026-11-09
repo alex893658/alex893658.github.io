@@ -3,9 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TDDC Schools &amp; College — Developing a Child for Life</title>
-<meta name="description" content="TDDC Schools & College, Ikotun, Lagos. Government, WAEC and NECO approved. Day and boarding admissions ongoing.">
-<link rel="icon" href="/tddc-logo.png">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>TDDC Schools &amp; College | Developing a Child for Life</title>
+<meta name="description" content="TDDC Schools & College, Ikotun, Lagos. Day and boarding admissions ongoing.">
+<meta property="og:title" content="TDDC Schools &amp; College">
+<meta property="og:description" content="Nursery, Primary and Secondary school in Ikotun, Lagos. Day and boarding admissions ongoing.">
+<meta property="og:image" content="tddc-logo.png">
+<meta name="theme-color" content="#1B2350">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,7 +28,7 @@
     --ink:#1A1B1E;
     --paper:#FFFFFF;
     --line:rgba(27,35,80,0.12);
-    --radius:14px;
+    --radius:10px;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   html{scroll-behavior:smooth;}
@@ -51,7 +59,7 @@
   .nav-links a{font-size:0.92rem;font-weight:500;color:var(--navy);}
   .btn{
     display:inline-flex;align-items:center;gap:8px;
-    padding:11px 22px;border-radius:999px;font-weight:600;font-size:0.9rem;
+    padding:11px 22px;border-radius:8px;font-weight:600;font-size:0.9rem;
     border:1.5px solid transparent;transition:transform .15s ease, box-shadow .15s ease;
   }
   .btn-primary{background:var(--flame);color:#fff;}
@@ -90,7 +98,7 @@
   .badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
   .badge{
     font-size:0.78rem;font-weight:600;color:var(--navy);
-    background:#fff;border:1px solid var(--line);padding:7px 14px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);padding:7px 14px;border-radius:8px;
   }
 
   /* ---- Section shell ---- */
@@ -141,18 +149,25 @@
   form{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;}
   .field{margin-bottom:16px;}
   .field label{display:block;font-size:0.84rem;font-weight:600;color:var(--navy);margin-bottom:6px;}
-  .field input, .field textarea{
+  .field input, .field textarea, .field select{
     width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:9px;
     font-family:'Inter',sans-serif;font-size:0.94rem;background:var(--cream);
   }
   .field textarea{resize:vertical;min-height:90px;}
-  .field input:focus, .field textarea:focus{outline:2px solid var(--green);outline-offset:1px;}
+  .field input:focus, .field textarea:focus, .field select:focus{outline:2px solid var(--green);outline-offset:1px;}
   #formMsg{font-size:0.88rem;margin-top:10px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:480px){.row2{grid-template-columns:1fr;}}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+  .consent{font-size:0.8rem;color:#5A5D68;margin-bottom:14px;}
+  .consent a,.foot-bottom a{text-decoration:underline;}
+  button.btn{cursor:pointer;font-family:inherit;}
+  a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
   /* ---- Portal CTA ---- */
   .portal-cta{
     background:linear-gradient(135deg, var(--green-deep), var(--green));
-    border-radius:20px;max-width:1000px;margin:0 auto;padding:44px 32px;
+    border-radius:12px;max-width:1000px;margin:0 auto;padding:44px 32px;
     text-align:center;color:#fff;
   }
   .portal-cta h2{color:#fff;font-size:clamp(1.4rem,3vw,1.9rem);margin-bottom:10px;}
@@ -177,7 +192,7 @@
 <header>
   <nav>
     <div class="brand">
-      <img src="/tddc-logo.png" alt="TDDC Schools & College crest">
+      <img src="tddc-logo.png" alt="TDDC Schools &amp; College crest" width="42" height="42">
       <span>TDDC Schools &amp; College</span>
     </div>
     <div class="nav-links">
@@ -192,18 +207,16 @@
 
 <section class="hero">
   <div class="hero-inner">
-    <img class="crest" src="/tddc-logo.png" alt="TDDC crest">
+    <img class="crest" src="tddc-logo.png" alt="TDDC crest">
     <div class="eyebrow"><span class="flame"></span> Ikotun, Lagos State</div>
     <h1>Developing <em>every</em> child for a lifetime of purpose.</h1>
     <div class="ribbon">Developing a Child for Life</div>
-    <p class="sub">TDDC Schools &amp; College is a government, WAEC and NECO approved day and boarding school, admitting into Nursery, Primary and Secondary classes.</p>
+    <p class="sub">TDDC Schools &amp; College is a day and boarding school in Ikotun, Lagos, admitting into Nursery, Primary and Secondary classes.</p>
     <div class="hero-ctas">
       <a href="#admissions" class="btn btn-primary">Start an Enquiry</a>
       <a href="tddc-portal.html" class="btn btn-ghost">Student &amp; Staff Portal</a>
     </div>
     <div class="badges">
-      <span class="badge">Government Approved</span>
-      <span class="badge">WAEC &amp; NECO Registered</span>
       <span class="badge">Day &amp; Boarding</span>
       <span class="badge">Admission Ongoing</span>
     </div>
@@ -218,9 +231,9 @@
   </div>
   <div class="cards3">
     <div class="card">
-      <div class="num">300+</div>
-      <h3>Students strong</h3>
-      <p>A full community across Nursery, Primary and Secondary, taught by dedicated resident and day staff.</p>
+      <div class="num">3 sections</div>
+      <h3>Nursery to Secondary</h3>
+      <p>One school community across Nursery, Primary and Secondary, taught by dedicated resident and day staff.</p>
     </div>
     <div class="card">
       <div class="num">Day &amp; Boarding</div>
@@ -228,9 +241,9 @@
       <p>Families choose day or boarding, with the same standard of teaching, welfare and supervision either way.</p>
     </div>
     <div class="card">
-      <div class="num">WAEC / NECO</div>
-      <h3>Fully approved</h3>
-      <p>Government, WAEC and NECO approved, so results and certificates carry full national recognition.</p>
+      <div class="num">Ikotun, Lagos</div>
+      <h3>Easy to reach</h3>
+      <p>Gideon Street, Agaye Ije-ododo Island, via Ijegun. Visit the reception for forms and a tour.</p>
     </div>
   </div>
 
@@ -285,21 +298,21 @@
   </div>
   <div class="hl-grid">
     <div class="hl-card">
-      <img src="/award-winners.jpg" alt="TDDC students with EduFest Spelling Bout awards">
+      <img loading="lazy" decoding="async" src="award-winners.jpg" alt="TDDC students with EduFest Spelling Bout awards">
       <div class="hl-body">
         <h3>EduFest Spelling Bout</h3>
         <p>TDDC students placed among the top winners, taking home the second runner-up prize.</p>
       </div>
     </div>
     <div class="hl-card">
-      <img src="/cultural-day.jpg" alt="TDDC students at cultural day">
+      <img loading="lazy" decoding="async" src="cultural-day.jpg" alt="TDDC students at cultural day">
       <div class="hl-body">
         <h3>Cultural Day</h3>
         <p>Students celebrated Nigeria's diverse ethnic heritage through dress, food and display.</p>
       </div>
     </div>
     <div class="hl-card">
-      <img src="/fcmb-event.jpg" alt="TDDC students at an FCMB sponsored event">
+      <img loading="lazy" decoding="async" src="fcmb-event.jpg" alt="TDDC students at an FCMB sponsored event">
       <div class="hl-body">
         <h3>FCMB Partnership Event</h3>
         <p>TDDC students represented the school at an FCMB-sponsored educational outing.</p>
@@ -314,10 +327,10 @@
     <h2>Life at TDDC.</h2>
   </div>
   <div class="gallery">
-    <img src="/school-building.jpg" alt="TDDC school building">
+    <img loading="lazy" decoding="async" src="school-building.jpg" alt="TDDC school building">
     <div class="col">
-      <img src="/students-group.jpg" alt="TDDC students smiling in front of the school">
-      <img src="/cultural-day.jpg" alt="TDDC students at a school event">
+      <img loading="lazy" decoding="async" src="students-group.jpg" alt="TDDC students smiling in front of the school">
+      <img loading="lazy" decoding="async" src="cultural-day.jpg" alt="TDDC students at a school event">
     </div>
   </div>
 </section>
@@ -343,7 +356,7 @@
           </div>
           <div class="info-item">
             <div class="dot">C</div>
-            <div><h4>Call</h4><p>0802 618 8967 &nbsp;·&nbsp; 0806 535 4263</p></div>
+            <div><h4>Call</h4><p><a href="tel:+2348026188967">0802 618 8967</a> &nbsp;&middot;&nbsp; <a href="tel:+2348065354263">0806 535 4263</a></p></div>
           </div>
           <div class="info-item">
             <div class="dot">E</div>
@@ -351,13 +364,19 @@
           </div>
         </div>
       </div>
-      <form id="inquiryForm">
-        <div class="field"><label for="name">Full name</label><input id="name" required></div>
-        <div class="field"><label for="phone">Phone number</label><input id="phone" required></div>
-        <div class="field"><label for="email">Email (optional)</label><input id="email" type="email"></div>
-        <div class="field"><label for="message">Your message</label><textarea id="message" required placeholder="Tell us the class you're enquiring about..."></textarea></div>
+      <form id="inquiryForm" novalidate>
+        <div class="field"><label for="name">Full name</label><input id="name" name="name" required maxlength="80" autocomplete="name"></div>
+        <div class="field"><label for="phone">Phone number</label><input id="phone" name="phone" type="tel" required maxlength="25" autocomplete="tel" inputmode="tel"></div>
+        <div class="field"><label for="email">Email (optional)</label><input id="email" name="email" type="email" maxlength="120" autocomplete="email"></div>
+        <div class="row2">
+          <div class="field"><label for="section">Section</label><select id="section"><option value="">Select</option><option>Nursery</option><option>Primary</option><option>Secondary</option></select></div>
+          <div class="field"><label for="mode">Day or boarding</label><select id="mode"><option value="">Select</option><option>Day</option><option>Boarding</option></select></div>
+        </div>
+        <div class="field"><label for="message">Your message</label><textarea id="message" name="message" required maxlength="1500" placeholder="Tell us the class you're enquiring about..."></textarea></div>
+        <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+        <p class="consent">We use these details only to reply to your enquiry. See our <a href="privacy.html">Privacy Policy</a>.</p>
         <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Send Enquiry</button>
-        <p id="formMsg"></p>
+        <p id="formMsg" role="status"></p>
       </form>
     </div>
   </div>
@@ -374,7 +393,7 @@
 <footer>
   <div class="foot-grid">
     <div class="foot-brand">
-      <img src="/tddc-logo.png" alt="TDDC crest">
+      <img src="tddc-logo.png" alt="TDDC crest">
       <span>TDDC Schools &amp; College</span>
     </div>
     <div class="foot-links">
@@ -389,45 +408,62 @@
         <h5>Contact</h5>
         <p>0817 866 4999</p>
         <p>info@tddcschool.com</p>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Use</a>
       </div>
     </div>
   </div>
-  <div class="foot-bottom">© <span id="year"></span> TDDC Schools &amp; College — Developing a Child for Life.</div>
+  <div class="foot-bottom">&copy; <span id="year"></span> TDDC Schools &amp; College. Developing a Child for Life.</div>
 </footer>
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  // ==== SET THIS to your Apps Script Web App URL (must end in /exec) ====
   const API_URL = "https://script.google.com/macros/s/AKfycbzpVG8hHPPBt344_B9AcKSWSYBJGCcYWQOSnZphbByNETCBC6jZkSKm2PkY8tYz_WuY/exec";
+  const loadedAt = Date.now();
 
   const form = document.getElementById('inquiryForm');
   const msg = document.getElementById('formMsg');
+  const btn = form.querySelector('button[type="submit"]');
+
+  function say(text, color){ msg.style.color = color; msg.textContent = text; }
+
   form.addEventListener('submit', async function(e){
     e.preventDefault();
-    msg.style.color = '#5A5D68';
-    msg.textContent = 'Sending...';
-    const params = new URLSearchParams({
-      action: 'submitInquiry',
-      name: document.getElementById('name').value,
-      phone: document.getElementById('phone').value,
-      email: document.getElementById('email').value,
-      message: document.getElementById('message').value
-    });
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const message = document.getElementById('message').value.trim();
+    if(name.length < 2){ say('Please enter your full name.', 'var(--flame)'); return; }
+    if(!/^[0-9+()\-\s]{7,25}$/.test(phone)){ say('Please enter a valid phone number.', 'var(--flame)'); return; }
+    if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ say('Please enter a valid email address.', 'var(--flame)'); return; }
+    if(message.length < 5){ say('Please tell us a little about your enquiry.', 'var(--flame)'); return; }
+
+    say('Sending...', '#5A5D68');
+    btn.disabled = true;
     try{
-      const res = await fetch(API_URL + '?' + params.toString());
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({
+          action: 'submitEnquiry', name, phone, email, message,
+          section: document.getElementById('section').value,
+          mode: document.getElementById('mode').value,
+          website: document.getElementById('website').value,
+          t: loadedAt
+        })
+      });
       const data = await res.json();
       if(data.success){
-        msg.style.color = 'var(--green-deep)';
-        msg.textContent = data.message || 'Thank you — we will get back to you soon.';
+        say(data.message || 'Thank you. We will get back to you soon.', 'var(--green-deep)');
         form.reset();
       } else {
-        msg.style.color = 'var(--flame)';
-        msg.textContent = data.message || 'Something went wrong. Please try WhatsApp instead.';
+        say(data.message || 'Something went wrong. Please try WhatsApp instead.', 'var(--flame)');
       }
     } catch(err){
-      msg.style.color = 'var(--flame)';
-      msg.textContent = 'Could not send right now. Please try WhatsApp instead.';
+      say('Could not send right now. Please try WhatsApp instead.', 'var(--flame)');
+    } finally {
+      btn.disabled = false;
     }
   });
 </script>

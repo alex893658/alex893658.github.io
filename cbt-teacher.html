@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TDDC CBT — Teachers</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -86,7 +87,7 @@
       <div class="row2">
         <div>
           <label>Subject</label>
-          <input id="q_subject" placeholder="e.g. Mathematics">
+          <select id="q_subject"></select>
         </div>
         <div>
           <label>Class</label>
@@ -147,7 +148,7 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
       <h2>Manage Questions</h2>
       <p class="muted">You can see and remove questions here, but not exam results — ask your exam officer for those.</p>
       <label>Filter by subject</label>
-      <input id="manageSubjectFilter" placeholder="Leave blank for all">
+      <select id="manageSubjectFilter" data-blank="1"></select>
       <button onclick="loadQuestions()">Load</button>
       <table id="questionsTable">
         <thead><tr><th>Subject</th><th>Class</th><th>Question</th><th>Answer</th><th></th></tr></thead>
@@ -161,24 +162,50 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
   // ⚠️ Same deployed Apps Script Web App URL as the other CBT pages
   const API_URL = 'https://script.google.com/macros/s/AKfycbzPT3ToJxGZXtL047qn5eDfSwflzKdbmyvL50sETzh2lUaLS3-EUxcXrIFUoH0kzuzJ/exec';
 
+  let token = '';
+  const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
   async function callApi(payload) {
-    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-    return res.json();
+    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(Object.assign({ token }, payload)) });
+    const data = await res.json();
+    if (data && data.code === 'AUTH' && token) {
+      token = '';
+      alert('Your session ended. Please log in again.');
+      location.reload();
+    }
+    return data;
   }
 
+  const SUBJECT_SELECTS = ["q_subject", "manageSubjectFilter"];
   let staffName = '';
+  async function loadSubjectChoices() {
+    const res = await callApi({ action: 'getSubjectList' });
+    const list = (res && res.subjects) || [];
+    const opts = list.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+    SUBJECT_SELECTS.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const keepBlank = el.dataset.blank === '1';
+      el.innerHTML = (keepBlank ? '<option value="">All subjects</option>' : '<option value="">Choose a subject</option>') + opts;
+    });
+  }
+
 
   async function teacherLogin() {
     const staffId = document.getElementById('staffId').value.trim();
     const pin = document.getElementById('pin').value;
     const res = await callApi({ action: 'teacherLogin', staffId, pin });
     if (!res.success) {
-      document.getElementById('loginError').classList.remove('hidden');
+      const le = document.getElementById('loginError');
+      le.textContent = res.error || 'Invalid Staff ID or PIN.';
+      le.classList.remove('hidden');
       return;
     }
+    token = res.token;
     staffName = res.name || staffId;
     document.getElementById('loginCard').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
+    loadSubjectChoices();
   }
 
   function switchTab(tab) {
@@ -186,7 +213,7 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
       document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
     });
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
+    if (typeof event !== 'undefined' && event && event.target) event.target.classList.add('active');
     if (tab === 'manage') loadQuestions();
   }
 
@@ -235,11 +262,11 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
       parsedBulkQuestions = parsed;
       document.querySelector('#bulkPreviewTable tbody').innerHTML = parsed.map(q => `
         <tr>
-          <td>${q.subject}</td>
-          <td>${q.className || '<span class="muted">all</span>'}</td>
-          <td>${q.question}</td>
-          <td>${q.correctAnswer}</td>
-          <td>${q.marks}</td>
+          <td>${esc(q.subject)}</td>
+          <td>${esc(q.className) || '<span class="muted">all</span>'}</td>
+          <td>${esc(q.question)}</td>
+          <td>${esc(q.correctAnswer)}</td>
+          <td>${esc(q.marks)}</td>
         </tr>
       `).join('');
       document.getElementById('bulkPreviewWrap').classList.remove('hidden');
@@ -248,7 +275,7 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
 
   async function confirmBulkUpload() {
     if (!parsedBulkQuestions.length) return;
-    const res = await callApi({ action: 'bulkAddQuestions', questions: JSON.stringify(parsedBulkQuestions), actor: staffName });
+    const res = await callApi({ action: 'bulkAddQuestions', questions: JSON.stringify(parsedBulkQuestions) });
     const successBox = document.getElementById('bulkSuccess');
     if (res.success) {
       successBox.textContent = `${res.added} question(s) uploaded successfully.`;
@@ -274,7 +301,7 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
       optionD: document.getElementById('q_d').value.trim(),
       correctAnswer: document.getElementById('q_correct').value,
       marks: Number(document.getElementById('q_marks').value) || 1,
-      actor: staffName
+      
     };
     if (!payload.subject || !payload.question || !payload.optionA || !payload.optionB) {
       alert('Please fill in subject, question, and at least options A and B.');
@@ -292,20 +319,21 @@ English | JSS1 | Choose the correctly spelled word | Recieve | Receive | Receeve
     const subject = document.getElementById('manageSubjectFilter').value.trim();
     const res = await callApi({ action: 'getAllQuestions', subject });
     const tbody = document.querySelector('#questionsTable tbody');
-    tbody.innerHTML = res.questions.map(q => `
+    tbody.innerHTML = (res.questions || []).map(q => `
       <tr>
-        <td>${q.Subject}</td>
-        <td>${q.Class}</td>
-        <td>${q.Question}</td>
-        <td>${q.CorrectAnswer}</td>
-        <td><button class="small secondary" onclick="deleteQuestion('${q.QuestionID}')">Delete</button></td>
+        <td>${esc(q.Subject)}</td>
+        <td>${esc(q.Class)}</td>
+        <td>${esc(q.Question)}</td>
+        <td>${esc(q.CorrectAnswer)}</td>
+        <td><button class="small secondary" onclick="deleteQuestion('${esc(q.QuestionID)}')">Delete</button></td>
       </tr>
     `).join('') || '<tr><td colspan="5" class="muted">No questions found.</td></tr>';
   }
 
   async function deleteQuestion(id) {
     if (!confirm('Delete this question?')) return;
-    await callApi({ action: 'deleteQuestion', questionId: id });
+    const delRes = await callApi({ action: 'deleteQuestion', questionId: id });
+    if (!delRes.success) alert(delRes.error || 'Could not delete that question.');
     loadQuestions();
   }
 </script>

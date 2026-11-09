@@ -1,11 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal — TDDC Schools &amp; College</title>
-<link rel="icon" href="/tddc-logo.png">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>Portal | TDDC Schools &amp; College</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -13,7 +17,7 @@
 :root{
   --navy:#1B2350; --green:#2E9E44; --green-deep:#1F7A34;
   --flame:#E2492E; --gold:#D4A94C; --cream:#FBF8F2;
-  --ink:#1A1B1E; --paper:#FFFFFF; --line:rgba(27,35,80,0.12); --radius:14px;
+  --ink:#1A1B1E; --paper:#FFFFFF; --line:rgba(27,35,80,0.12); --radius:10px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);line-height:1.6;}
@@ -31,8 +35,8 @@ main{max-width:640px;margin:0 auto;padding:50px 24px 80px;}
 .intro img{width:70px;margin:0 auto 14px;}
 .intro h1{font-size:1.7rem;margin-bottom:8px;}
 .intro p{color:#5A5D68;font-size:0.95rem;}
-.tabs{display:flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px;margin-bottom:26px;}
-.tab{flex:1;text-align:center;padding:11px;border-radius:999px;font-weight:600;font-size:0.92rem;color:#5A5D68;cursor:pointer;transition:all .15s ease;}
+.tabs{display:flex;background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px;margin-bottom:26px;}
+.tab{flex:1;text-align:center;padding:11px;border-radius:8px;font-weight:600;font-size:0.92rem;color:#5A5D68;cursor:pointer;transition:all .15s ease;}
 .tab.active{background:var(--green);color:#fff;}
 .panel{display:none;}
 .panel.active{display:block;}
@@ -47,7 +51,7 @@ main{max-width:640px;margin:0 auto;padding:50px 24px 80px;}
 .field input:focus, .field select:focus, .field textarea:focus{outline:2px solid var(--green);outline-offset:1px;}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;
-  padding:13px;border-radius:999px;font-weight:600;font-size:0.95rem;border:none;cursor:pointer;
+  padding:13px;border-radius:8px;font-weight:600;font-size:0.95rem;border:none;cursor:pointer;
   background:var(--flame);color:#fff;transition:transform .15s ease;
 }
 .btn:hover{transform:translateY(-1px);}
@@ -61,7 +65,7 @@ main{max-width:640px;margin:0 auto;padding:50px 24px 80px;}
 .dash-head p{color:#5A5D68;font-size:0.88rem;}
 .logout{font-size:0.85rem;font-weight:600;color:var(--flame);cursor:pointer;}
 .subtabs{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
-.subtab{padding:9px 16px;border-radius:999px;font-size:0.86rem;font-weight:600;background:#fff;border:1px solid var(--line);color:var(--navy);cursor:pointer;}
+.subtab{padding:9px 16px;border-radius:8px;font-size:0.86rem;font-weight:600;background:#fff;border:1px solid var(--line);color:var(--navy);cursor:pointer;}
 .subtab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
 .subpanel{display:none;}
 .subpanel.active{display:block;}
@@ -94,9 +98,9 @@ tr:last-child td{border-bottom:none;}
 .finance-card .lbl{font-size:0.75rem;font-weight:600;color:#5A5D68;text-transform:uppercase;}
 .finance-card .amt{font-family:'Fraunces',serif;font-size:1.3rem;color:var(--navy);margin-top:4px;}
 .finance-card.warn .amt{color:var(--flame);}
-.badge-paid{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#E6F5EA;color:var(--green-deep);}
-.badge-pending{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#FFF3E0;color:#B36B00;}
-.badge-rejected{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#FBE4E0;color:var(--flame);}
+.badge-paid{display:inline-block;padding:3px 10px;border-radius:8px;font-size:0.75rem;font-weight:600;background:#E6F5EA;color:var(--green-deep);}
+.badge-pending{display:inline-block;padding:3px 10px;border-radius:8px;font-size:0.75rem;font-weight:600;background:#FFF3E0;color:#B36B00;}
+.badge-rejected{display:inline-block;padding:3px 10px;border-radius:8px;font-size:0.75rem;font-weight:600;background:#FBE4E0;color:var(--flame);}
 .fee-accordion{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:18px;}
 .fee-row{border-bottom:1px solid var(--line);}
 .fee-row:last-child{border-bottom:none;}
@@ -106,7 +110,7 @@ tr:last-child td{border-bottom:none;}
 .fee-row-head .fee-term{display:block;font-size:0.78rem;color:#5A5D68;font-weight:500;margin-top:2px;}
 .fee-row-right{display:flex;align-items:center;gap:12px;}
 .fee-row-right .fee-amt{font-weight:700;color:var(--navy);}
-.fee-row-right .fee-owe{font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:999px;background:#FBE4E0;color:var(--flame);}
+.fee-row-right .fee-owe{font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:8px;background:#FBE4E0;color:var(--flame);}
 .fee-row-right .fee-owe.clear{background:#E6F5EA;color:var(--green-deep);}
 .fee-chevron{transition:transform .2s ease;color:#5A5D68;font-size:0.8rem;}
 .fee-row.open .fee-chevron{transform:rotate(180deg);}
@@ -119,57 +123,71 @@ tr:last-child td{border-bottom:none;}
 .fee-detail-item .val{font-weight:700;color:var(--navy);margin-top:2px;font-size:0.94rem;}
 .fee-pay-note{font-size:0.82rem;color:#5A5D68;margin-bottom:12px;}
 .fee-row-body .btn{width:auto;padding:9px 18px;font-size:0.85rem;}
+button{font-family:inherit;}
+.tab,.subtab,.logout{border:0;background:none;font-family:inherit;}
+.tabs .tab{border-radius:6px;}
+.subtab{border:1px solid var(--line);background:#fff;}
+.subtab.active{border-color:var(--navy);}
+.logout{background:none;padding:6px 0;}
+.fee-row-head{width:100%;border:0;text-align:left;font-family:inherit;font-size:inherit;color:inherit;}
+.fee-pay-note a,.linkbtn{color:var(--flame);font-weight:600;background:none;border:0;cursor:pointer;font-family:inherit;font-size:inherit;text-decoration:underline;padding:0;}
+.btn:disabled{opacity:.6;cursor:wait;}
+.btn:focus-visible,.tab:focus-visible,.subtab:focus-visible,.logout:focus-visible,.fee-row-head:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.sitefoot{max-width:640px;margin:0 auto;padding:0 24px 40px;text-align:center;font-size:0.8rem;color:#5A5D68;}
+.sitefoot a{text-decoration:underline;margin:0 8px;}
+.hint{font-size:0.78rem;color:#5A5D68;margin-top:12px;text-align:center;}
 </style>
 </head>
 <body>
 <header>
 <nav>
 <div class="brand">
-<img src="/tddc-logo.png" alt="TDDC crest">
+<img src="tddc-logo.png" alt="TDDC crest">
 <span>TDDC Portal</span>
 </div>
-<a href="index.html" class="back">← Back to website</a>
+<a href="index.html" class="back">&larr; Back to website</a>
 </nav>
 </header>
 <main>
 <div id="loginView">
 <div class="intro">
-<img src="/tddc-logo.png" alt="TDDC crest">
+<img src="tddc-logo.png" alt="TDDC crest">
 <h1>Student &amp; Staff Portal</h1>
 <p>Log in to view results, class notes, school fees, and staff payslips.</p>
 </div>
-<div class="tabs">
-<div class="tab active" data-tab="student">Student</div>
-<div class="tab" data-tab="teacher">Teacher</div>
+<div class="tabs" role="tablist">
+<button type="button" class="tab active" data-tab="student" role="tab">Student</button>
+<button type="button" class="tab" data-tab="teacher" role="tab">Teacher</button>
 </div>
 <div class="panel active" id="studentPanel">
 <div class="card">
 <div class="field">
 <label for="admissionNo">Admission Number</label>
-<input id="admissionNo" placeholder="e.g. TDDC/2024/013">
+<input id="admissionNo" placeholder="e.g. TDDC/2024/013" autocomplete="username" maxlength="60">
 </div>
 <div class="field">
 <label for="studentPassword">Password</label>
-<input id="studentPassword" type="password" placeholder="Your password">
+<input id="studentPassword" type="password" placeholder="Your password" autocomplete="current-password" maxlength="64">
 </div>
-<button class="btn" id="studentLoginBtn">Log In</button>
-<p class="login-msg" id="studentLoginMsg"></p>
+<button class="btn" id="studentLoginBtn" type="button">Log In</button>
+<p class="login-msg" id="studentLoginMsg" role="status"></p>
 </div>
 </div>
 <div class="panel" id="teacherPanel">
 <div class="card">
 <div class="field">
 <label for="staffId">Staff ID</label>
-<input id="staffId" placeholder="e.g. TDDC-STAFF-04">
+<input id="staffId" placeholder="e.g. TDDC-STAFF-04" autocomplete="username" maxlength="60">
 </div>
 <div class="field">
 <label for="teacherPassword">Password</label>
-<input id="teacherPassword" type="password" placeholder="Your password">
+<input id="teacherPassword" type="password" placeholder="Your password" autocomplete="current-password" maxlength="64">
 </div>
-<button class="btn" id="teacherLoginBtn">Log In</button>
-<p class="login-msg" id="teacherLoginMsg"></p>
+<button class="btn" id="teacherLoginBtn" type="button">Log In</button>
+<p class="login-msg" id="teacherLoginMsg" role="status"></p>
 </div>
 </div>
+<p class="hint">Forgot your password? Ask the school office to reset it.</p>
 </div>
 
 <!-- STUDENT DASHBOARD -->
@@ -179,13 +197,13 @@ tr:last-child td{border-bottom:none;}
 <h2 id="studentWelcome">Welcome</h2>
 <p id="studentClassLine"></p>
 </div>
-<span class="logout" data-logout>Log out</span>
+<button type="button" class="logout" data-logout>Log out</button>
 </div>
 <div class="subtabs">
-<div class="subtab active" data-sub="overview" data-owner="student">Overview</div>
-<div class="subtab" data-sub="results" data-owner="student">Results</div>
-<div class="subtab" data-sub="notes" data-owner="student">Note Bank</div>
-<div class="subtab" data-sub="fees" data-owner="student">School Fees</div>
+<button type="button" class="subtab active" data-sub="overview" data-owner="student">Overview</button>
+<button type="button" class="subtab" data-sub="results" data-owner="student">Results</button>
+<button type="button" class="subtab" data-sub="notes" data-owner="student">Note Bank</button>
+<button type="button" class="subtab" data-sub="fees" data-owner="student">School Fees</button>
 </div>
 <div class="subpanel active" id="student-overview">
 <div id="studentOverviewArea" class="loading">Loading overview...</div>
@@ -214,8 +232,8 @@ tr:last-child td{border-bottom:none;}
 <select id="receiptFeeItem"></select>
 </div>
 <div class="field">
-<label for="receiptAmount">Amount Paid (₦)</label>
-<input id="receiptAmount" type="number" placeholder="e.g. 50000">
+<label for="receiptAmount">Amount Paid (&#8358;)</label>
+<input id="receiptAmount" type="number" min="1" placeholder="e.g. 50000">
 </div>
 <div class="field">
 <label for="receiptTerm">Term</label>
@@ -224,11 +242,11 @@ tr:last-child td{border-bottom:none;}
 </select>
 </div>
 <div class="field">
-<label for="receiptFile">Receipt Photo</label>
-<input id="receiptFile" type="file" accept="image/*,.pdf">
+<label for="receiptFile">Receipt Photo (JPG, PNG or PDF, max 5MB)</label>
+<input id="receiptFile" type="file" accept="image/jpeg,image/png,image/webp,.pdf">
 </div>
-<button class="btn secondary" id="uploadReceiptBtn">Submit Receipt</button>
-<p class="login-msg" id="uploadReceiptMsg"></p>
+<button class="btn secondary" id="uploadReceiptBtn" type="button">Submit Receipt</button>
+<p class="login-msg" id="uploadReceiptMsg" role="status"></p>
 </div>
 <div id="myReceiptsArea" style="margin-top:20px;"></div>
 </div>
@@ -241,47 +259,47 @@ tr:last-child td{border-bottom:none;}
 <h2 id="teacherWelcome">Welcome</h2>
 <p id="teacherClassLine"></p>
 </div>
-<span class="logout" data-logout>Log out</span>
+<button type="button" class="logout" data-logout>Log out</button>
 </div>
 <div class="subtabs">
-<div class="subtab active" data-sub="addnote" data-owner="teacher">Add a Note</div>
-<div class="subtab" data-sub="viewnotes" data-owner="teacher">Class Notes</div>
-<div class="subtab" data-sub="classlist" data-owner="teacher">Class List</div>
-<div class="subtab" data-sub="classsheet" data-owner="teacher">Class Sheet</div>
-<div class="subtab" data-sub="payslips" data-owner="teacher">My Payslips</div>
+<button type="button" class="subtab active" data-sub="addnote" data-owner="teacher">Add a Note</button>
+<button type="button" class="subtab" data-sub="viewnotes" data-owner="teacher">Class Notes</button>
+<button type="button" class="subtab" data-sub="classlist" data-owner="teacher">Class List</button>
+<button type="button" class="subtab" data-sub="classsheet" data-owner="teacher">Class Sheet</button>
+<button type="button" class="subtab" data-sub="payslips" data-owner="teacher">My Payslips</button>
 </div>
 <div class="subpanel active" id="teacher-addnote">
 <div class="card">
-<div class="field"><label for="noteTitle">Note title</label><input id="noteTitle" placeholder="e.g. Mid-term revision, Basic Science"></div>
-<div class="field"><label for="noteClass">Class</label><input id="noteClass" placeholder="e.g. JSS 2"></div>
-<div class="field"><label for="noteSubject">Subject</label><input id="noteSubject" placeholder="e.g. Mathematics"></div>
-<div class="field"><label for="noteLink">Link to file (Google Drive link, optional)</label><input id="noteLink" placeholder="https://..."></div>
-<div class="field"><label for="noteDesc">Short description</label><textarea id="noteDesc" placeholder="What is this note about?"></textarea></div>
-<button class="btn secondary" id="addNoteBtn">Add to Note Bank</button>
-<p class="login-msg" id="addNoteMsg"></p>
+<div class="field"><label for="noteTitle">Note title</label><input id="noteTitle" maxlength="150" placeholder="e.g. Mid-term revision, Basic Science"></div>
+<div class="field"><label for="noteClass">Class</label><input id="noteClass" maxlength="40" placeholder="e.g. JSS 2"></div>
+<div class="field"><label for="noteSubject">Subject</label><input id="noteSubject" maxlength="80" placeholder="e.g. Mathematics"></div>
+<div class="field"><label for="noteLink">Link to file (Google Drive link, optional)</label><input id="noteLink" maxlength="500" placeholder="https://..."></div>
+<div class="field"><label for="noteDesc">Short description</label><textarea id="noteDesc" maxlength="2000" placeholder="What is this note about?"></textarea></div>
+<button class="btn secondary" id="addNoteBtn" type="button">Add to Note Bank</button>
+<p class="login-msg" id="addNoteMsg" role="status"></p>
 </div>
 </div>
 <div class="subpanel" id="teacher-viewnotes">
 <div class="field" style="max-width:260px;">
 <label for="viewClassInput">Class</label>
-<input id="viewClassInput" placeholder="e.g. JSS 2">
+<input id="viewClassInput" maxlength="40" placeholder="e.g. JSS 2">
 </div>
-<button class="btn secondary" id="loadClassNotesBtn" style="max-width:200px;margin-bottom:18px;">View Notes</button>
+<button class="btn secondary" id="loadClassNotesBtn" type="button" style="max-width:200px;margin-bottom:18px;">View Notes</button>
 <div id="teacherNotesArea"></div>
 </div>
 <div class="subpanel" id="teacher-classlist">
 <div class="field" style="max-width:260px;">
 <label for="listClassInput">Class</label>
-<input id="listClassInput" placeholder="e.g. JSS 2">
+<input id="listClassInput" maxlength="40" placeholder="e.g. JSS 2">
 </div>
-<button class="btn secondary" id="loadClassListBtn" style="max-width:200px;margin-bottom:18px;">View Class List</button>
+<button class="btn secondary" id="loadClassListBtn" type="button" style="max-width:200px;margin-bottom:18px;">View Class List</button>
 <div id="classListArea"></div>
 </div>
 <div class="subpanel" id="teacher-classsheet">
 <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px;">
 <div class="field" style="max-width:200px;">
 <label for="sheetClassInput">Class</label>
-<input id="sheetClassInput" placeholder="e.g. JSS 2">
+<input id="sheetClassInput" maxlength="40" placeholder="e.g. JSS 2">
 </div>
 <div class="field" style="max-width:200px;">
 <label for="sheetTermInput">Term</label>
@@ -292,7 +310,7 @@ tr:last-child td{border-bottom:none;}
 </select>
 </div>
 </div>
-<button class="btn secondary" id="loadClassSheetBtn" style="max-width:200px;margin-bottom:18px;">Load Class Sheet</button>
+<button class="btn secondary" id="loadClassSheetBtn" type="button" style="max-width:200px;margin-bottom:18px;">Load Class Sheet</button>
 <div id="classSheetArea"></div>
 </div>
 <div class="subpanel" id="teacher-payslips">
@@ -300,22 +318,84 @@ tr:last-child td{border-bottom:none;}
 </div>
 </div>
 </main>
+<div class="sitefoot">
+<a href="privacy.html">Privacy Policy</a>
+<a href="terms.html">Terms of Use</a>
+</div>
 <script>
-// ==== SET THIS to your Apps Script Web App URL (must end in /exec) ====
+// Apps Script web app URLs (must end in /exec)
 const API_URL = "https://script.google.com/macros/s/AKfycbzpVG8hHPPBt344_B9AcKSWSYBJGCcYWQOSnZphbByNETCBC6jZkSKm2PkY8tYz_WuY/exec";
-// ==== SET THIS to your Finance Apps Script Web App URL (must end in /exec) ====
 const FINANCE_API = "https://script.google.com/macros/s/AKfycbwccxwVk5m2pitZhhZ5xxB1rw7SjHJhA03Iw8fLoS29L3N1SFPgUz0fMxUEjDhz9Uelrw/exec";
 
-let currentStudent = null;
-let currentTeacher = null;
-let sheetSubjects = [];
+const $ = (id) => document.getElementById(id);
+const IDLE_MS = 20 * 60 * 1000;
 
+// The token lives in memory only. Closing or refreshing the page logs you out.
+let session = { token: null, role: null, id: null, data: null };
+let sheetSubjects = [];
+let lastFeesData = null;
+let idleTimer = null;
+
+// ---- safety helpers ----
+function esc(v){
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function safeUrl(u){
+  try{
+    const x = new URL(String(u || ''));
+    return (x.protocol === 'https:' || x.protocol === 'http:') ? x.href : '';
+  }catch(e){ return ''; }
+}
+function naira(n){ return '₦' + Number(n || 0).toLocaleString('en-NG'); }
+function setMsg(el, text, kind){
+  el.style.color = kind === 'ok' ? 'var(--green-deep)' : kind === 'err' ? 'var(--flame)' : '#5A5D68';
+  el.textContent = text;
+}
+
+// ---- network (POST only, nothing sensitive in the URL) ----
+async function post(url, params){
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    body: JSON.stringify(params)
+  });
+  const data = await res.json();
+  if(data && data.code === 'AUTH' && session.token){
+    logout('Your session ended. Please log in again.');
+  }
+  return data;
+}
+const apiCall = (params) => post(API_URL, Object.assign({token: session.token}, params));
+const financeCall = (params) => post(FINANCE_API, Object.assign({token: session.token}, params));
+
+// ---- session ----
+function touch(){
+  clearTimeout(idleTimer);
+  if(session.token) idleTimer = setTimeout(()=>logout('You were logged out after 20 minutes of inactivity.'), IDLE_MS);
+}
+['click','keydown','touchstart'].forEach(ev => document.addEventListener(ev, touch, {passive:true}));
+
+function logout(message){
+  session = { token: null, role: null, id: null, data: null };
+  lastFeesData = null; sheetSubjects = [];
+  clearTimeout(idleTimer);
+  $('studentDash').classList.remove('active');
+  $('teacherDash').classList.remove('active');
+  $('loginView').style.display = 'block';
+  ['studentPassword','teacherPassword','admissionNo','staffId'].forEach(id => { $(id).value = ''; });
+  ['studentOverviewArea','resultsArea','studentNotesArea','studentFeesArea','myReceiptsArea','teacherNotesArea','classListArea','classSheetArea','staffPayslipsArea'].forEach(id => { $(id).innerHTML = ''; });
+  ['studentLoginMsg','teacherLoginMsg'].forEach(id => setMsg($(id), message || '', message ? 'err' : ''));
+}
+
+// ---- tabs ----
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.addEventListener('click', ()=>{
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
     tab.classList.add('active');
-    document.getElementById(tab.dataset.tab+'Panel').classList.add('active');
+    $(tab.dataset.tab + 'Panel').classList.add('active');
   });
 });
 
@@ -324,186 +404,167 @@ document.querySelectorAll('.subtab').forEach(st=>{
     const owner = st.dataset.owner;
     document.querySelectorAll('.subtab[data-owner="'+owner+'"]').forEach(t=>t.classList.remove('active'));
     st.classList.add('active');
-    const dash = owner === 'student' ? document.getElementById('studentDash') : document.getElementById('teacherDash');
+    const dash = $(owner === 'student' ? 'studentDash' : 'teacherDash');
     dash.querySelectorAll('.subpanel').forEach(p=>p.classList.remove('active'));
-    const idPrefix = owner === 'student' ? 'student-' : 'teacher-';
-    document.getElementById(idPrefix+st.dataset.sub).classList.add('active');
-    if(st.dataset.sub === 'overview' && currentStudent) loadStudentOverview();
-    if(st.dataset.sub === 'fees' && currentStudent) loadStudentFees();
-    if(st.dataset.sub === 'notes' && currentStudent) loadStudentNotes();
-    if(st.dataset.sub === 'payslips' && currentTeacher) loadStaffPayslips();
+    $((owner === 'student' ? 'student-' : 'teacher-') + st.dataset.sub).classList.add('active');
+    if(session.role === 'student'){
+      if(st.dataset.sub === 'overview') loadStudentOverview();
+      if(st.dataset.sub === 'fees') loadStudentFees();
+      if(st.dataset.sub === 'notes') loadStudentNotes();
+    }
+    if(session.role === 'staff' && st.dataset.sub === 'payslips') loadStaffPayslips();
   });
 });
 
-document.querySelectorAll('[data-logout]').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    currentStudent = null; currentTeacher = null;
-    document.getElementById('studentDash').classList.remove('active');
-    document.getElementById('teacherDash').classList.remove('active');
-    document.getElementById('loginView').style.display = 'block';
-    document.getElementById('studentPassword').value = '';
-    document.getElementById('teacherPassword').value = '';
-  });
-});
+document.querySelectorAll('[data-logout]').forEach(btn => btn.addEventListener('click', ()=>logout('')));
 
-async function apiCall(params){
-  const url = API_URL + '?' + new URLSearchParams(params).toString();
-  const res = await fetch(url);
-  return res.json();
-}
-
-async function financeCall(params){
-  const url = FINANCE_API + '?' + new URLSearchParams(params).toString();
-  const res = await fetch(url);
-  return res.json();
-}
-
-async function financeCallPost(params){
-  const res = await fetch(FINANCE_API, {
-    method: 'POST',
-    headers: {'Content-Type': 'text/plain;charset=utf-8'},
-    body: JSON.stringify(params)
-  });
-  return res.json();
-}
-
-function naira(n){ return '₦' + Number(n||0).toLocaleString('en-NG'); }
-
-
-
-document.getElementById('studentLoginBtn').addEventListener('click', async ()=>{
-  const admissionNo = document.getElementById('admissionNo').value.trim();
-  const password = document.getElementById('studentPassword').value;
-  const msg = document.getElementById('studentLoginMsg');
-  if(!admissionNo || !password){ msg.style.color='var(--flame)'; msg.textContent='Please fill in both fields.'; return; }
-  msg.style.color='#5A5D68'; msg.textContent='Checking...';
+// ---- login ----
+async function doLogin(kind){
+  const isStudent = kind === 'student';
+  const id = $(isStudent ? 'admissionNo' : 'staffId').value.trim();
+  const pw = $(isStudent ? 'studentPassword' : 'teacherPassword').value;
+  const msg = $(isStudent ? 'studentLoginMsg' : 'teacherLoginMsg');
+  const btn = $(isStudent ? 'studentLoginBtn' : 'teacherLoginBtn');
+  if(!id || !pw){ setMsg(msg, 'Please fill in both fields.', 'err'); return; }
+  setMsg(msg, 'Checking...');
+  btn.disabled = true;
   try{
-    const data = await apiCall({action:'studentLogin', id: admissionNo, pin: password});
-    if(data.success){
-      currentStudent = data;
-      document.getElementById('loginView').style.display='none';
-      document.getElementById('studentDash').classList.add('active');
-      document.getElementById('studentWelcome').textContent = 'Welcome, ' + data.name;
-      document.getElementById('studentClassLine').textContent = data.studentClass;
-      currentStudent.admissionNo = admissionNo;
+    const data = await post(API_URL, {action: isStudent ? 'studentLogin' : 'staffLogin', id, pin: pw});
+    if(!data.success){ setMsg(msg, data.message || 'Login failed.', 'err'); return; }
+    session = { token: data.token, role: isStudent ? 'student' : 'staff', id, data };
+    setMsg(msg, '');
+    $('loginView').style.display = 'none';
+    $('studentPassword').value = ''; $('teacherPassword').value = '';
+    touch();
+    if(isStudent){
+      $('studentDash').classList.add('active');
+      $('studentWelcome').textContent = 'Welcome, ' + data.name;
+      $('studentClassLine').textContent = data.studentClass || '';
       loadStudentOverview();
     } else {
-      msg.style.color='var(--flame)'; msg.textContent = data.message;
+      $('teacherDash').classList.add('active');
+      $('teacherWelcome').textContent = 'Welcome, ' + data.name;
+      const classes = (data.classes || []).join(', ');
+      $('teacherClassLine').textContent = classes ? 'Classes: ' + classes : 'No class assigned yet';
+      ['noteClass','viewClassInput','listClassInput','sheetClassInput'].forEach(f => { $(f).value = data.assignedClass || ''; });
     }
-  } catch(e){ msg.style.color='var(--flame)'; msg.textContent='Could not connect. Please try again.'; }
-});
+  }catch(e){
+    setMsg(msg, 'Could not connect. Please try again.', 'err');
+  }finally{
+    btn.disabled = false;
+  }
+}
+$('studentLoginBtn').addEventListener('click', ()=>doLogin('student'));
+$('teacherLoginBtn').addEventListener('click', ()=>doLogin('teacher'));
+['admissionNo','studentPassword'].forEach(id => $(id).addEventListener('keydown', e => { if(e.key === 'Enter') doLogin('student'); }));
+['staffId','teacherPassword'].forEach(id => $(id).addEventListener('keydown', e => { if(e.key === 'Enter') doLogin('teacher'); }));
 
-document.getElementById('teacherLoginBtn').addEventListener('click', async ()=>{
-  const staffId = document.getElementById('staffId').value.trim();
-  const password = document.getElementById('teacherPassword').value;
-  const msg = document.getElementById('teacherLoginMsg');
-  if(!staffId || !password){ msg.style.color='var(--flame)'; msg.textContent='Please fill in both fields.'; return; }
-  msg.style.color='#5A5D68'; msg.textContent='Checking...';
-  try{
-    const data = await apiCall({action:'staffLogin', id: staffId, pin: password});
-    if(data.success){
-      currentTeacher = data;
-      document.getElementById('loginView').style.display='none';
-      document.getElementById('teacherDash').classList.add('active');
-      document.getElementById('teacherWelcome').textContent = 'Welcome, ' + data.name;
-      document.getElementById('teacherClassLine').textContent = 'Assigned class: ' + (data.assignedClass || '—');
-      document.getElementById('noteClass').value = data.assignedClass || '';
-      document.getElementById('viewClassInput').value = data.assignedClass || '';
-      document.getElementById('listClassInput').value = data.assignedClass || '';
-      document.getElementById('sheetClassInput').value = data.assignedClass || '';
-      currentTeacher.staffId = staffId;
-    } else {
-      msg.style.color='var(--flame)'; msg.textContent = data.message;
-    }
-  } catch(e){ msg.style.color='var(--flame)'; msg.textContent='Could not connect. Please try again.'; }
-});
-
-document.getElementById('termSelect').addEventListener('change', (e)=>{
-  const area = document.getElementById('resultsArea');
-  if(!currentStudent || !currentStudent.terms){ area.className='empty'; area.textContent='No results found.'; return; }
-  const terms = currentStudent.terms.filter(t => !e.target.value || t.term === e.target.value);
-  if(terms.length===0){ area.className='empty'; area.textContent='No results for this term.'; return; }
+// ---- student: results, overview, notes ----
+$('termSelect').addEventListener('change', (e)=>{
+  const area = $('resultsArea');
+  const all = session.data && session.data.terms;
+  if(!all || !all.length){ area.className='empty'; area.textContent='No results found.'; return; }
+  const terms = all.filter(t => !e.target.value || t.term === e.target.value);
+  if(!terms.length){ area.className='empty'; area.textContent='No results for this term.'; return; }
   let html = '<table><tr><th>Subject</th><th>Score</th><th>Grade</th></tr>';
-  terms.forEach(t=>{
-    t.subjects.forEach(s=>{
-      html += `<tr><td>${s.subject}</td><td>${s.score}</td><td>${s.grade}</td></tr>`;
-    });
-  });
+  terms.forEach(t => t.subjects.forEach(s => {
+    html += '<tr><td>'+esc(s.subject)+'</td><td>'+esc(s.score)+'</td><td>'+esc(s.grade)+'</td></tr>';
+  }));
   html += '</table>';
   area.className=''; area.innerHTML = html;
 });
 
-async function loadStudentNotes(){
-  const area = document.getElementById('studentNotesArea');
-  area.className='loading'; area.textContent='Loading notes...';
-  const data = await apiCall({action:'getNotes', className: currentStudent.className});
-  renderNotes(data, area);
+function loadStudentOverview(){
+  const area = $('studentOverviewArea');
+  const d = session.data || {};
+  area.className='';
+  area.innerHTML =
+    '<div class="card">' +
+    '<div class="fee-detail-item" style="margin-bottom:14px"><div class="lbl">Name</div><div class="val" style="font-size:1.15rem">'+esc(d.name || 'N/A')+'</div></div>' +
+    '<div class="fee-detail-item"><div class="lbl">Class</div><div class="val" style="font-size:1.15rem">'+esc(d.studentClass || 'N/A')+'</div></div>' +
+    '</div>';
 }
 
-let lastFeesData = null;
+async function loadStudentNotes(){
+  const area = $('studentNotesArea');
+  area.className='loading'; area.textContent='Loading notes...';
+  try{
+    renderNotes(await apiCall({action:'getNotes'}), area);
+  }catch(e){
+    area.className='empty'; area.textContent='Could not load notes. Please try again.';
+  }
+}
 
+function renderNotes(data, area){
+  if(!data.success){ area.className='empty'; area.textContent = data.message || 'Could not load notes.'; return; }
+  if(!data.notes || !data.notes.length){ area.className='empty'; area.textContent='No notes uploaded for this class yet.'; return; }
+  area.className='';
+  area.innerHTML = data.notes.map(n=>{
+    const link = safeUrl(n.fileLink);
+    return '<div class="note-item">' +
+      '<h4>'+esc(n.title)+'</h4>' +
+      '<div class="meta">'+esc(n.subject || 'General')+' &middot; '+esc(n.className)+'</div>' +
+      '<p>'+esc(n.description || '')+'</p>' +
+      (link ? '<a class="file" href="'+esc(link)+'" target="_blank" rel="noopener noreferrer">Open file &rarr;</a>' : '') +
+      '</div>';
+  }).join('');
+}
+
+// ---- student: fees ----
 async function loadStudentFees(){
-  const area = document.getElementById('studentFeesArea');
+  const area = $('studentFeesArea');
   area.className='loading'; area.textContent='Loading fee information...';
   try{
-    const data = await financeCall({action:'studentFees', admissionNo: currentStudent.admissionNo});
+    const data = await financeCall({action:'studentFees'});
     lastFeesData = data;
-    if(!data.success){
-      area.className='empty'; area.textContent='Could not load fee records.';
-      return;
-    }
+    if(!data.success){ area.className='empty'; area.textContent = data.message || 'Could not load fee records.'; return; }
     if(!data.student){
       area.className='empty';
       area.textContent = data.message || 'No fee record yet. Please contact the bursar.';
       return;
     }
     let html = '';
-
+    let items = [];
     if(data.items && data.items.length){
-      // Sum this student's confirmed payments per fee item name, so each
-      // line can show what's still owed on that specific fee (not just the
-      // overall balance).
       const paidByItem = {};
       (data.payments || []).forEach(p=>{
         const key = p.feeItem || 'General Payment';
         paidByItem[key] = (paidByItem[key] || 0) + (Number(p.amount) || 0);
       });
+      // If the same fee is listed twice, keep the copy with the larger amount.
+      const seen = {};
+      data.items.forEach(i=>{
+        const key = String(i.name || '').trim().toLowerCase() + '|' + String(i.term || '').trim().toLowerCase();
+        if(seen[key] === undefined){ seen[key] = items.length; items.push(i); }
+        else if((Number(i.amount) || 0) > (Number(items[seen[key]].amount) || 0)){ items[seen[key]] = i; }
+      });
 
-      html += '<h3 style="font-size:0.95rem;margin:18px 0 10px">Fee Breakdown</h3>';
-      html += '<div class="fee-accordion">';
-      data.items.forEach((i, idx)=>{
+      html += '<h3 style="font-size:0.95rem;margin:18px 0 10px">Fee Breakdown</h3><div class="fee-accordion">';
+      items.forEach((i, idx)=>{
         const paid = paidByItem[i.name] || 0;
         const owing = Math.max(0, (Number(i.amount) || 0) - paid);
-        const rowId = 'feeRow' + idx;
-        html += `
-          <div class="fee-row" id="${rowId}">
-            <div class="fee-row-head" onclick="toggleFeeRow('${rowId}')">
-              <div>
-                <span class="fee-name">${i.name}</span>
-                <span class="fee-term">${i.term || 'All Terms'}</span>
-              </div>
-              <div class="fee-row-right">
-                <span class="fee-owe ${owing<=0?'clear':''}">${owing<=0?'Fully Paid':'Owing ' + naira(owing)}</span>
-                <span class="fee-amt">${naira(i.amount)}</span>
-                <span class="fee-chevron">&#9660;</span>
-              </div>
-            </div>
-            <div class="fee-row-body">
-              <div class="fee-row-body-inner">
-                <div class="fee-detail-grid">
-                  <div class="fee-detail-item"><div class="lbl">Amount</div><div class="val">${naira(i.amount)}</div></div>
-                  <div class="fee-detail-item"><div class="lbl">Amount Owing</div><div class="val">${naira(owing)}</div></div>
-                  <div class="fee-detail-item"><div class="lbl">Term</div><div class="val">${i.term || 'All Terms'}</div></div>
-                  <div class="fee-detail-item"><div class="lbl">Pay Into</div><div class="val">${i.accountLabel || 'General Account'}</div></div>
-                </div>
-                <p class="fee-pay-note">
-                  <strong>${i.bankName || '—'}</strong> · ${i.accountName || '—'} · ${i.accountNumber || '—'}
-                  ${i.payInstructions ? '<br>' + i.payInstructions : ''}
-                </p>
-                <button class="btn secondary" onclick="startReceiptFor('${i.name.replace(/'/g,"\\'")}')">Drop Payment Receipt</button>
-              </div>
-            </div>
-          </div>`;
+        html +=
+          '<div class="fee-row">' +
+            '<button type="button" class="fee-row-head" data-toggle-fee aria-expanded="false">' +
+              '<div><span class="fee-name">'+esc(i.name)+'</span><span class="fee-term">'+esc(i.term || 'All Terms')+'</span></div>' +
+              '<div class="fee-row-right">' +
+                '<span class="fee-owe '+(owing<=0?'clear':'')+'">'+(owing<=0 ? 'Fully Paid' : 'Owing ' + esc(naira(owing)))+'</span>' +
+                '<span class="fee-amt">'+esc(naira(i.amount))+'</span>' +
+                '<span class="fee-chevron">&#9660;</span>' +
+              '</div>' +
+            '</button>' +
+            '<div class="fee-row-body"><div class="fee-row-body-inner">' +
+              '<div class="fee-detail-grid">' +
+                '<div class="fee-detail-item"><div class="lbl">Amount</div><div class="val">'+esc(naira(i.amount))+'</div></div>' +
+                '<div class="fee-detail-item"><div class="lbl">Amount Owing</div><div class="val">'+esc(naira(owing))+'</div></div>' +
+                '<div class="fee-detail-item"><div class="lbl">Term</div><div class="val">'+esc(i.term || 'All Terms')+'</div></div>' +
+                '<div class="fee-detail-item"><div class="lbl">Pay Into</div><div class="val">'+esc(i.accountLabel || 'General Account')+'</div></div>' +
+              '</div>' +
+              '<p class="fee-pay-note"><strong>'+esc(i.bankName || 'N/A')+'</strong> &middot; '+esc(i.accountName || 'N/A')+' &middot; '+esc(i.accountNumber || 'N/A') +
+                (i.payInstructions ? '<br>'+esc(i.payInstructions) : '') + '</p>' +
+              '<button type="button" class="btn secondary" data-receipt-for="'+esc(i.name)+'">Drop Payment Receipt</button>' +
+            '</div></div>' +
+          '</div>';
       });
       html += '</div>';
     }
@@ -512,7 +573,8 @@ async function loadStudentFees(){
     if(data.payments && data.payments.length){
       html += '<table><thead><tr><th>Date</th><th>Amount</th><th>Fee Item</th><th>Method</th><th>Receipt</th></tr></thead><tbody>';
       data.payments.forEach(p=>{
-        html += `<tr><td>${p.date}</td><td>${naira(p.amount)}</td><td>${p.feeItem||p.term||'—'}</td><td>${p.method}</td><td>${p.receiptNo ? `<a href="#" onclick="printReceipt('${p.receiptNo}');return false;">${p.receiptNo}</a>` : '—'}</td></tr>`;
+        html += '<tr><td>'+esc(p.date)+'</td><td>'+esc(naira(p.amount))+'</td><td>'+esc(p.feeItem || p.term || 'N/A')+'</td><td>'+esc(p.method)+'</td><td>' +
+          (p.receiptNo ? '<button type="button" class="linkbtn" data-print-receipt="'+esc(p.receiptNo)+'">'+esc(p.receiptNo)+'</button>' : 'N/A') + '</td></tr>';
       });
       html += '</tbody></table>';
     } else {
@@ -520,305 +582,269 @@ async function loadStudentFees(){
     }
     area.className=''; area.innerHTML = html;
 
-    document.getElementById('receiptFeeItem').innerHTML =
-      '<option value="General Payment">General Payment</option>' +
-      (data.items || []).map(i=>`<option value="${i.name}">${i.name}</option>`).join('');
-
+    $('receiptFeeItem').innerHTML = '<option value="General Payment">General Payment</option>' +
+      items.map(i => '<option value="'+esc(i.name)+'">'+esc(i.name)+'</option>').join('');
     loadMyReceipts();
-  } catch(e){
+  }catch(e){
     area.className='empty'; area.textContent='Finance service unavailable. Contact the school bursar.';
   }
 }
 
-window.toggleFeeRow = (rowId)=>{
-  const row = document.getElementById(rowId);
-  if(!row) return;
-  const wasOpen = row.classList.contains('open');
-  document.querySelectorAll('.fee-row.open').forEach(r=>r.classList.remove('open'));
-  if(!wasOpen) row.classList.add('open');
-};
-
-window.startReceiptFor = (feeItemName)=>{
-  const select = document.getElementById('receiptFeeItem');
-  if(select) select.value = feeItemName;
-  const card = document.getElementById('feeReceiptUploadCard');
-  if(card) card.scrollIntoView({ behavior:'smooth', block:'start' });
-};
+// One delegated listener for everything that was an inline onclick before.
+document.addEventListener('click', (e)=>{
+  const toggle = e.target.closest('[data-toggle-fee]');
+  if(toggle){
+    const row = toggle.closest('.fee-row');
+    const wasOpen = row.classList.contains('open');
+    document.querySelectorAll('.fee-row.open').forEach(r => { r.classList.remove('open'); r.querySelector('[data-toggle-fee]').setAttribute('aria-expanded','false'); });
+    if(!wasOpen){ row.classList.add('open'); toggle.setAttribute('aria-expanded','true'); }
+    return;
+  }
+  const rec = e.target.closest('[data-receipt-for]');
+  if(rec){
+    const sel = $('receiptFeeItem');
+    sel.value = rec.getAttribute('data-receipt-for');
+    $('feeReceiptUploadCard').scrollIntoView({behavior:'smooth', block:'start'});
+    return;
+  }
+  const pr = e.target.closest('[data-print-receipt]');
+  if(pr){ printReceipt(pr.getAttribute('data-print-receipt')); }
+});
 
 function receiptBadge(status){
-  const s = String(status||'').toLowerCase();
-  if(s==='confirmed') return '<span class="badge-paid">Confirmed</span>';
-  if(s==='rejected') return '<span class="badge-rejected">Rejected</span>';
+  const s = String(status || '').toLowerCase();
+  if(s === 'confirmed') return '<span class="badge-paid">Confirmed</span>';
+  if(s === 'rejected') return '<span class="badge-rejected">Rejected</span>';
   return '<span class="badge-pending">Pending Review</span>';
 }
 
 async function loadMyReceipts(){
-  const area = document.getElementById('myReceiptsArea');
+  const area = $('myReceiptsArea');
   try{
-    const data = await financeCall({action:'listMyReceipts', admissionNo: currentStudent.admissionNo});
-    if(!data.success || !data.submissions || data.submissions.length===0){
-      area.innerHTML = '';
-      return;
-    }
+    const data = await financeCall({action:'listMyReceipts'});
+    if(!data.success || !data.submissions || !data.submissions.length){ area.innerHTML = ''; return; }
     let html = '<h3 style="font-size:0.95rem;margin-bottom:10px">My Submitted Receipts</h3>';
     html += '<table><thead><tr><th>Date</th><th>Fee Item</th><th>Amount</th><th>Status</th></tr></thead><tbody>';
     data.submissions.forEach(s=>{
-      html += `<tr><td>${s.submittedDate}</td><td>${s.feeItemName}</td><td>${naira(s.amount)}</td><td>${receiptBadge(s.status)}</td></tr>`;
+      html += '<tr><td>'+esc(s.submittedDate)+'</td><td>'+esc(s.feeItemName)+'</td><td>'+esc(naira(s.amount))+'</td><td>'+receiptBadge(s.status)+
+        (String(s.status).toLowerCase()==='rejected' && s.reviewNote ? '<div style="font-size:0.75rem;color:#5A5D68;margin-top:4px">'+esc(s.reviewNote)+'</div>' : '') + '</td></tr>';
     });
     html += '</tbody></table>';
     area.innerHTML = html;
-  } catch(e){
-    area.innerHTML = '';
-  }
+  }catch(e){ area.innerHTML = ''; }
 }
 
-document.getElementById('uploadReceiptBtn').addEventListener('click', async ()=>{
-  const msg = document.getElementById('uploadReceiptMsg');
-  const fileInput = document.getElementById('receiptFile');
-  const amount = document.getElementById('receiptAmount').value;
-  const feeItem = document.getElementById('receiptFeeItem').value;
-  const term = document.getElementById('receiptTerm').value;
-
-  if(!fileInput.files.length || !amount){
-    msg.style.color='var(--flame)'; msg.textContent='Please enter the amount and choose a receipt photo.';
-    return;
+$('uploadReceiptBtn').addEventListener('click', async ()=>{
+  const msg = $('uploadReceiptMsg');
+  const btn = $('uploadReceiptBtn');
+  const fileInput = $('receiptFile');
+  const amount = $('receiptAmount').value;
+  if(!fileInput.files.length || !amount || Number(amount) <= 0){
+    setMsg(msg, 'Please enter the amount and choose a receipt photo.', 'err'); return;
   }
   const file = fileInput.files[0];
-  if(file.size > 5 * 1024 * 1024){
-    msg.style.color='var(--flame)'; msg.textContent='That file is too large. Please use a photo under 5MB.';
-    return;
-  }
-
-  msg.style.color='#5A5D68'; msg.textContent='Uploading...';
+  if(file.size > 5 * 1024 * 1024){ setMsg(msg, 'That file is too large. Please use a photo under 5MB.', 'err'); return; }
+  if(!/^(image\/(jpeg|png|webp)|application\/pdf)$/.test(file.type)){ setMsg(msg, 'Only JPG, PNG, WEBP or PDF files are accepted.', 'err'); return; }
+  setMsg(msg, 'Uploading...');
+  btn.disabled = true;
   try{
     const fileData = await new Promise((resolve, reject)=>{
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onload = () => resolve(String(reader.result).split(',')[1]);
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-
-    const data = await financeCallPost({
+    const data = await financeCall({
       action:'submitReceipt',
-      admissionNo: currentStudent.admissionNo,
-      feeItem, amount, term,
-      fileData, fileName: file.name, mimeType: file.type
+      feeItem: $('receiptFeeItem').value, amount, term: $('receiptTerm').value,
+      fileData
     });
-
     if(data.success){
-      msg.style.color='var(--green-deep)'; msg.textContent = data.message;
-      document.getElementById('receiptAmount').value = '';
-      fileInput.value = '';
+      setMsg(msg, data.message, 'ok');
+      $('receiptAmount').value = ''; fileInput.value = '';
       loadMyReceipts();
     } else {
-      msg.style.color='var(--flame)'; msg.textContent = data.message;
+      setMsg(msg, data.message || 'Could not upload.', 'err');
     }
-  } catch(e){
-    msg.style.color='var(--flame)'; msg.textContent='Could not upload. Please try again.';
+  }catch(e){
+    setMsg(msg, 'Could not upload. Please try again.', 'err');
+  }finally{
+    btn.disabled = false;
   }
 });
 
-window.printReceipt = (receiptNo)=>{
+function printReceipt(receiptNo){
   if(!lastFeesData || !lastFeesData.payments) return;
-  const p = lastFeesData.payments.find(x=>x.receiptNo===receiptNo);
+  const p = lastFeesData.payments.find(x => x.receiptNo === receiptNo);
   if(!p) return;
-  const s = lastFeesData.student || {};
+  const line = (a, b) => '<div class="line"><span>'+esc(a)+'</span><span>'+esc(b)+'</span></div>';
   const w = window.open('', '_blank', 'width=420,height=560');
-  w.document.write(`
-    <html><head><title>Receipt ${receiptNo}</title>
-    <style>
-      body{font-family:Arial,sans-serif;padding:24px;color:#1B2350;}
-      h2{margin-bottom:0;}
-      .line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;}
-      .total{font-weight:bold;font-size:1.1rem;margin-top:12px;}
-    </style></head><body>
-      <h2>TDDC Schools &amp; College</h2>
-      <p style="color:#666">Official Fee Payment Receipt</p>
-      <div class="line"><span>Receipt No.</span><span>${p.receiptNo}</span></div>
-      <div class="line"><span>Student</span><span>${p.studentName || currentStudent.name}</span></div>
-      <div class="line"><span>Admission No.</span><span>${p.admissionNo || currentStudent.admissionNo}</span></div>
-      <div class="line"><span>Fee Item</span><span>${p.feeItem||p.term||'—'}</span></div>
-      <div class="line"><span>Method</span><span>${p.method}</span></div>
-      <div class="line"><span>Date</span><span>${p.date}</span></div>
-      <div class="line total"><span>Amount Paid</span><span>${naira(p.amount)}</span></div>
-      <p style="margin-top:24px;color:#999;font-size:0.8rem">Generated from the TDDC parent portal.</p>
-      <script>window.print()<\/script>
-    </body></html>`);
+  if(!w) return;
+  w.document.write(
+    '<!doctype html><html><head><meta charset="utf-8"><title>Receipt '+esc(receiptNo)+'</title><style>' +
+    'body{font-family:Arial,sans-serif;padding:24px;color:#1B2350;}h2{margin-bottom:0;}' +
+    '.line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;}' +
+    '.total{font-weight:bold;font-size:1.1rem;margin-top:12px;}</style></head><body>' +
+    '<h2>TDDC Schools &amp; College</h2><p style="color:#666">Fee Payment Receipt</p>' +
+    line('Receipt No.', p.receiptNo) +
+    line('Student', p.studentName || (session.data && session.data.name) || '') +
+    line('Admission No.', p.admissionNo || session.id || '') +
+    line('Fee Item', p.feeItem || p.term || 'N/A') +
+    line('Method', p.method) +
+    line('Date', p.date) +
+    '<div class="line total"><span>Amount Paid</span><span>'+esc(naira(p.amount))+'</span></div>' +
+    '<p style="margin-top:24px;color:#999;font-size:0.8rem">Generated from the TDDC portal.</p></body></html>'
+  );
   w.document.close();
-};
-
-async function loadStudentOverview(){
-  const area = document.getElementById('studentOverviewArea');
-  area.className='';
-  area.innerHTML = `
-    <div class="card">
-      <div class="fee-detail-item" style="margin-bottom:14px">
-        <div class="lbl">Name</div>
-        <div class="val" style="font-size:1.15rem">${currentStudent.name || '—'}</div>
-      </div>
-      <div class="fee-detail-item">
-        <div class="lbl">Class</div>
-        <div class="val" style="font-size:1.15rem">${currentStudent.studentClass || '—'}</div>
-      </div>
-    </div>
-  `;
+  setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} }, 300);
 }
 
+// ---- teacher ----
 async function loadStaffPayslips(){
-  const area = document.getElementById('staffPayslipsArea');
+  const area = $('staffPayslipsArea');
   area.className='loading'; area.textContent='Loading payslips...';
   try{
-    const data = await financeCall({action:'staffPayslips', staffId: currentTeacher.staffId});
+    const data = await financeCall({action:'staffPayslips'});
     if(!data.success || !data.staff){
-      area.className='empty'; area.textContent = data.message || 'No payroll records found for your staff ID.';
-      return;
+      area.className='empty'; area.textContent = data.message || 'No payroll records found for your staff ID.'; return;
     }
-    let html = `
-      <p style="margin-bottom:14px;color:#5A5D68;font-size:0.9rem">${data.staff.role} · ${data.staff.department||'General'} · YTD earnings: <strong>${naira(data.ytdEarnings)}</strong></p>`;
+    let html = '<p style="margin-bottom:14px;color:#5A5D68;font-size:0.9rem">'+esc(data.staff.role)+' &middot; '+esc(data.staff.department || 'General')+' &middot; YTD earnings: <strong>'+esc(naira(data.ytdEarnings))+'</strong></p>';
     if(data.payslips && data.payslips.length){
       html += '<table><thead><tr><th>Period</th><th>Base</th><th>Allowances</th><th>Deductions</th><th>Net Pay</th><th>Status</th></tr></thead><tbody>';
       data.payslips.forEach(p=>{
-        const badge = String(p.status).toLowerCase()==='paid' ? 'badge-paid' : 'badge-pending';
-        html += `<tr><td>${p.month} ${p.year}</td><td>${naira(p.baseSalary)}</td><td>${naira(p.allowances)}</td><td>${naira(p.deductions)}</td><td><strong>${naira(p.netPay)}</strong></td><td><span class="${badge}">${p.status}</span></td></tr>`;
+        const badge = String(p.status).toLowerCase() === 'paid' ? 'badge-paid' : 'badge-pending';
+        html += '<tr><td>'+esc(p.month)+' '+esc(p.year)+'</td><td>'+esc(naira(p.baseSalary))+'</td><td>'+esc(naira(p.allowances))+'</td><td>'+esc(naira(p.deductions))+'</td><td><strong>'+esc(naira(p.netPay))+'</strong></td><td><span class="'+badge+'">'+esc(p.status)+'</span></td></tr>';
       });
       html += '</tbody></table>';
     } else {
       html += '<p class="empty">No payslips yet. Contact the bursar if you expect payment records.</p>';
     }
     area.className=''; area.innerHTML = html;
-  } catch(e){
+  }catch(e){
     area.className='empty'; area.textContent='Finance service unavailable. Contact the school bursar.';
   }
 }
 
-function renderNotes(data, area){
-  if(!data.success || !data.notes || data.notes.length===0){
-    area.className='empty'; area.textContent='No notes uploaded for this class yet.'; return;
-  }
-  area.className='';
-  area.innerHTML = data.notes.map(n=>`
-    <div class="note-item">
-      <h4>${n.title}</h4>
-      <div class="meta">${n.subject || 'General'} · ${n.className}</div>
-      <p>${n.description || ''}</p>
-      ${n.fileLink ? `<a class="file" href="${n.fileLink}" target="_blank" rel="noopener">Open file →</a>` : ''}
-    </div>
-  `).join('');
-}
-
-document.getElementById('addNoteBtn').addEventListener('click', async ()=>{
-  const msg = document.getElementById('addNoteMsg');
-  const title = document.getElementById('noteTitle').value.trim();
-  const className = document.getElementById('noteClass').value.trim();
-  if(!title || !className){ msg.style.color='var(--flame)'; msg.textContent='Title and class are required.'; return; }
-  msg.style.color='#5A5D68'; msg.textContent='Saving...';
-  const data = await apiCall({
-    action:'addNote', title, className,
-    subject: document.getElementById('noteSubject').value.trim(),
-    uploadedBy: currentTeacher.fullName,
-    fileLink: document.getElementById('noteLink').value.trim(),
-    description: document.getElementById('noteDesc').value.trim()
-  });
-  if(data.success){
-    msg.style.color='var(--green-deep)'; msg.textContent = data.message;
-    document.getElementById('noteTitle').value='';
-    document.getElementById('noteSubject').value='';
-    document.getElementById('noteLink').value='';
-    document.getElementById('noteDesc').value='';
-  } else {
-    msg.style.color='var(--flame)'; msg.textContent = data.message;
+$('addNoteBtn').addEventListener('click', async ()=>{
+  const msg = $('addNoteMsg');
+  const btn = $('addNoteBtn');
+  const title = $('noteTitle').value.trim();
+  const className = $('noteClass').value.trim();
+  if(!title || !className){ setMsg(msg, 'Title and class are required.', 'err'); return; }
+  setMsg(msg, 'Saving...');
+  btn.disabled = true;
+  try{
+    const data = await apiCall({
+      action:'addNote', title, className,
+      subject: $('noteSubject').value.trim(),
+      fileLink: $('noteLink').value.trim(),
+      description: $('noteDesc').value.trim()
+    });
+    if(data.success){
+      setMsg(msg, data.message, 'ok');
+      ['noteTitle','noteSubject','noteLink','noteDesc'].forEach(f => { $(f).value = ''; });
+    } else {
+      setMsg(msg, data.message || 'Could not save.', 'err');
+    }
+  }catch(e){
+    setMsg(msg, 'Could not connect. Please try again.', 'err');
+  }finally{
+    btn.disabled = false;
   }
 });
 
-document.getElementById('loadClassNotesBtn').addEventListener('click', async ()=>{
-  const area = document.getElementById('teacherNotesArea');
-  const className = document.getElementById('viewClassInput').value.trim();
+$('loadClassNotesBtn').addEventListener('click', async ()=>{
+  const area = $('teacherNotesArea');
+  const className = $('viewClassInput').value.trim();
   if(!className) return;
   area.className='loading'; area.textContent='Loading...';
-  const data = await apiCall({action:'getNotes', className});
-  renderNotes(data, area);
+  try{
+    renderNotes(await apiCall({action:'getNotes', className}), area);
+  }catch(e){
+    area.className='empty'; area.textContent='Could not load notes. Please try again.';
+  }
 });
 
-document.getElementById('loadClassListBtn').addEventListener('click', async ()=>{
-  const area = document.getElementById('classListArea');
-  const className = document.getElementById('listClassInput').value.trim();
+$('loadClassListBtn').addEventListener('click', async ()=>{
+  const area = $('classListArea');
+  const className = $('listClassInput').value.trim();
   if(!className) return;
   area.className='loading'; area.textContent='Loading...';
-  const data = await apiCall({action:'getClassSheet', className});
-  if(!data.success || !data.students || data.students.length===0){
-    area.className='empty'; area.textContent='No students found for this class.'; return;
+  try{
+    const data = await apiCall({action:'getClassSheet', className});
+    if(!data.success || !data.students || !data.students.length){
+      area.className='empty'; area.textContent = data.message || 'No students found for this class.'; return;
+    }
+    let html = '<table><tr><th>Admission No.</th><th>Full Name</th></tr>';
+    data.students.forEach(s => { html += '<tr><td>'+esc(s.admissionNo)+'</td><td>'+esc(s.fullName)+'</td></tr>'; });
+    html += '</table>';
+    area.className=''; area.innerHTML = html;
+  }catch(e){
+    area.className='empty'; area.textContent='Could not load the class list. Please try again.';
   }
-  let html = '<table><tr><th>Admission No.</th><th>Full Name</th></tr>';
-  data.students.forEach(s=>{ html += `<tr><td>${s.admissionNo}</td><td>${s.fullName}</td></tr>`; });
-  html += '</table>';
-  area.className=''; area.innerHTML = html;
 });
 
-// ==== CLASS SHEET (bulk result entry) ====
-document.getElementById('loadClassSheetBtn').addEventListener('click', async ()=>{
-  const area = document.getElementById('classSheetArea');
-  const className = document.getElementById('sheetClassInput').value.trim();
-  const term = document.getElementById('sheetTermInput').value;
-  if(!className){ return; }
+// ---- class sheet (bulk result entry) ----
+$('loadClassSheetBtn').addEventListener('click', async ()=>{
+  const area = $('classSheetArea');
+  const className = $('sheetClassInput').value.trim();
+  const term = $('sheetTermInput').value;
+  if(!className) return;
   area.className='loading'; area.textContent='Loading class sheet...';
   try{
     const data = await apiCall({action:'getClassSheet', className, term});
-    if(!data.success || !data.students || data.students.length===0){
-      area.className='empty'; area.textContent='No students found for this class.'; return;
+    if(!data.success || !data.students || !data.students.length){
+      area.className='empty'; area.textContent = data.message || 'No students found for this class.'; return;
     }
     sheetSubjects = data.subjects || [];
     renderClassSheet(data.students, className, term);
-  } catch(e){
+  }catch(e){
     area.className='empty'; area.textContent='Could not load class sheet. Please try again.';
   }
 });
 
 function renderClassSheet(students, className, term){
-  const area = document.getElementById('classSheetArea');
+  const area = $('classSheetArea');
   area.className = '';
-  let head = '<th class="name-th">Student</th>' + sheetSubjects.map(sub=>`<th>${sub}</th>`).join('');
-  let rows = students.map(s=>{
-    let cells = sheetSubjects.map(sub=>`<td><input class="score-input" type="number" min="0" max="100" data-admission="${s.admissionNo}" data-subject="${sub}"></td>`).join('');
-    return `<tr><td class="name-td">${s.fullName}</td>${cells}</tr>`;
+  const head = '<th class="name-th">Student</th>' + sheetSubjects.map(s => '<th>'+esc(s)+'</th>').join('');
+  const rows = students.map(s=>{
+    const cells = sheetSubjects.map(sub => '<td><input class="score-input" type="number" min="0" max="100" aria-label="'+esc(s.fullName+' '+sub)+'" data-admission="'+esc(s.admissionNo)+'" data-subject="'+esc(sub)+'"></td>').join('');
+    return '<tr><td class="name-td">'+esc(s.fullName)+'</td>'+cells+'</tr>';
   }).join('');
-  area.innerHTML = `
-    <div class="sheet-wrap">
-      <table class="sheet-table">
-        <thead><tr>${head}</tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-    <div class="sheet-actions">
-      <span class="sheet-status" id="sheetStatus"></span>
-      <button class="btn" id="submitClassSheetBtn" style="max-width:220px;">Submit Class Results</button>
-    </div>
-  `;
-  document.getElementById('submitClassSheetBtn').addEventListener('click', ()=>submitClassSheet(className, term));
+  area.innerHTML =
+    '<div class="sheet-wrap"><table class="sheet-table"><thead><tr>'+head+'</tr></thead><tbody>'+rows+'</tbody></table></div>' +
+    '<div class="sheet-actions"><span class="sheet-status" id="sheetStatus" role="status"></span>' +
+    '<button class="btn" id="submitClassSheetBtn" type="button" style="max-width:220px;">Submit Class Results</button></div>';
+  $('submitClassSheetBtn').addEventListener('click', ()=>submitClassSheet(className, term));
 }
 
 async function submitClassSheet(className, term){
-  const status = document.getElementById('sheetStatus');
-  const inputs = document.querySelectorAll('#classSheetArea .score-input');
+  const status = $('sheetStatus');
+  const btn = $('submitClassSheetBtn');
   const byStudent = {};
-  inputs.forEach(inp=>{
+  let bad = false;
+  document.querySelectorAll('#classSheetArea .score-input').forEach(inp=>{
     const val = inp.value.trim();
     if(val === '') return;
+    const n = Number(val);
+    if(!isFinite(n) || n < 0 || n > 100){ bad = true; inp.style.borderColor = 'var(--flame)'; return; }
+    inp.style.borderColor = '';
     const adm = inp.dataset.admission;
     if(!byStudent[adm]) byStudent[adm] = {};
-    byStudent[adm][inp.dataset.subject] = Number(val);
+    byStudent[adm][inp.dataset.subject] = n;
   });
+  if(bad){ setMsg(status, 'Scores must be between 0 and 100.', 'err'); return; }
   const results = Object.keys(byStudent).map(admissionNo => ({ admissionNo, scores: byStudent[admissionNo] }));
-  if(results.length === 0){ status.style.color='var(--flame)'; status.textContent='Enter at least one score first.'; return; }
-  status.style.color='#5A5D68'; status.textContent='Saving...';
+  if(!results.length){ setMsg(status, 'Enter at least one score first.', 'err'); return; }
+  setMsg(status, 'Saving...');
+  btn.disabled = true;
   try{
-    const data = await apiCall({ action:'submitClassResults', className, term, results: JSON.stringify(results) });
-    if(data.success){
-      status.style.color='var(--green-deep)'; status.textContent = data.message || 'Results saved.';
-    } else {
-      status.style.color='var(--flame)'; status.textContent = data.message || 'Could not save results.';
-    }
-  } catch(e){
-    status.style.color='var(--flame)'; status.textContent='Could not connect. Please try again.';
+    const data = await apiCall({ action:'submitClassResults', className, term, results });
+    setMsg(status, data.message || (data.success ? 'Results saved.' : 'Could not save results.'), data.success ? 'ok' : 'err');
+  }catch(e){
+    setMsg(status, 'Could not connect. Please try again.', 'err');
+  }finally{
+    btn.disabled = false;
   }
 }
 </script>

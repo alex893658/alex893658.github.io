@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TDDC CBT — Student Exam Portal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -73,6 +74,7 @@
   }
   button:hover { opacity: 0.9; }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.secondary { background: var(--navy); }
   .error { color: #c0392b; font-size: 0.85rem; margin-top: 8px; display: none; }
   .hidden { display: none !important; }
   .student-info {
@@ -172,12 +174,18 @@
     document.getElementById('loadingBox').classList.toggle('hidden', !show);
   }
 
+  let token = '';
+  const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
   async function callApi(payload) {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    return res.json();
+    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(Object.assign({ token }, payload)) });
+    const data = await res.json();
+    if (data && data.code === 'AUTH' && token) {
+      token = '';
+      alert('Your session ended. Please log in again.');
+      location.reload();
+    }
+    return data;
   }
 
   async function login() {
@@ -190,16 +198,19 @@
       const res = await callApi({ action: 'studentLogin', studentId: id, pin });
       showLoading(false);
       if (!res.success) {
-        document.getElementById('loginError').style.display = 'block';
+        const le = document.getElementById('loginError');
+        le.textContent = res.error || 'Invalid Student ID or PIN. Please check and try again.';
+        le.style.display = 'block';
         return;
       }
+      token = res.token;
       student = res;
       document.getElementById('studentInfoBox').innerHTML =
-        `<span><strong>${student.name}</strong> — ${student.className}</span><span>${student.studentId}</span>`;
+        `<span><strong>${esc(student.name)}</strong> — ${esc(student.className)}</span><span>${esc(student.studentId)}</span>`;
 
-      const subRes = await callApi({ action: 'getSubjects', className: student.className });
+      const subRes = await callApi({ action: 'getSubjects' });
       const select = document.getElementById('subjectSelect');
-      select.innerHTML = subRes.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+      select.innerHTML = (subRes.subjects || []).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
 
       document.getElementById('loginStep').classList.add('hidden');
       document.getElementById('subjectStep').classList.remove('hidden');
@@ -212,10 +223,10 @@
   async function backToSubjects() {
     document.getElementById('resultStep').classList.add('hidden');
     showLoading(true);
-    const subRes = await callApi({ action: 'getSubjects', className: student.className });
+    const subRes = await callApi({ action: 'getSubjects' });
     showLoading(false);
     const select = document.getElementById('subjectSelect');
-    select.innerHTML = subRes.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+    select.innerHTML = (subRes.subjects || []).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
     document.getElementById('subjectStep').classList.remove('hidden');
   }
 
@@ -224,12 +235,7 @@
     showLoading(true);
 
     try {
-      const configRes = await callApi({ action: 'getExamConfig', subject, className: student.className });
-      const questionsPerExam = configRes.questionsPerExam || DEFAULT_QUESTIONS_PER_EXAM;
-      const durationMinutes = configRes.durationMinutes || DEFAULT_DURATION_MINUTES;
-      const closesAt = configRes.closesAt ? new Date(configRes.closesAt) : null;
-
-      const res = await callApi({ action: 'getQuestions', subject, className: student.className, limit: questionsPerExam, studentId: student.studentId });
+      const res = await callApi({ action: 'getQuestions', subject });
       showLoading(false);
 
       if (!res.success) {
@@ -251,11 +257,11 @@
       document.getElementById('examSubjectLabel').textContent = subject;
       document.getElementById('questionsContainer').innerHTML = currentQuestions.map((q, i) => `
         <div class="q-block">
-          <div class="q-num">${i + 1}. ${q.Question}</div>
+          <div class="q-num">${i + 1}. ${esc(q.Question)}</div>
           ${q.Options.map((optText, idx) => `
             <label class="option">
-              <input type="radio" name="q_${q.QuestionID}" value="${String(optText || '').replace(/"/g, '&quot;')}">
-              <span>${String.fromCharCode(65 + idx)}. ${optText}</span>
+              <input type="radio" name="q_${esc(q.QuestionID)}" value="${esc(optText)}">
+              <span>${String.fromCharCode(65 + idx)}. ${esc(optText)}</span>
             </label>
           `).join('')}
         </div>
@@ -263,12 +269,22 @@
 
       document.getElementById('subjectStep').classList.add('hidden');
       document.getElementById('examStep').classList.remove('hidden');
+      submitting = false;
 
-      secondsLeft = durationMinutes * 60;
-      if (closesAt && !isNaN(closesAt.getTime())) {
-        const secondsUntilClose = Math.floor((closesAt.getTime() - Date.now()) / 1000);
-        if (secondsUntilClose < secondsLeft) secondsLeft = Math.max(secondsUntilClose, 0);
-      }
+      // Keep answers in this browser tab so a refresh does not lose them.
+      const saveKey = 'cbtAnswers_' + subject;
+      let saved = {};
+      try { saved = JSON.parse(sessionStorage.getItem(saveKey) || '{}'); } catch (e) {}
+      document.querySelectorAll('#questionsContainer input[type=radio]').forEach(inp => {
+        const qid = inp.name.slice(2);
+        if (saved[qid] !== undefined && saved[qid] === inp.value) inp.checked = true;
+        inp.addEventListener('change', () => {
+          saved[qid] = inp.value;
+          try { sessionStorage.setItem(saveKey, JSON.stringify(saved)); } catch (e) {}
+        });
+      });
+
+      secondsLeft = res.secondsLeft;
       updateTimerLabel();
       timerInterval = setInterval(() => {
         secondsLeft--;
@@ -290,11 +306,16 @@
     document.getElementById('timerLabel').textContent = `${m}:${s.toString().padStart(2, '0')}`;
   }
 
+  let submitting = false;
   async function submitExamNow() {
+    if (submitting) return;
+    submitting = true;
     clearInterval(timerInterval);
+    const subBtn = document.querySelector('#examStep button');
+    if (subBtn) subBtn.disabled = true;
     const answers = {};
     currentQuestions.forEach(q => {
-      const chosen = document.querySelector(`input[name="q_${q.QuestionID}"]:checked`);
+      const chosen = document.querySelector(`input[name="q_${esc(q.QuestionID)}"]:checked`);
       if (chosen) answers[q.QuestionID] = chosen.value;
     });
 
@@ -302,26 +323,27 @@
     try {
       const res = await callApi({
         action: 'submitExam',
-        studentId: student.studentId,
-        name: student.name,
-        className: student.className,
         subject: student.subject,
-        answers: JSON.stringify(answers),
-        servedQuestionIds: JSON.stringify(currentQuestions.map(q => q.QuestionID))
+        answers: JSON.stringify(answers)
       });
       showLoading(false);
 
       if (!res.success) {
         alert('Error submitting exam: ' + (res.error || 'unknown error'));
+        submitting = false;
+        if (subBtn) subBtn.disabled = false;
         return;
       }
+      try { sessionStorage.removeItem('cbtAnswers_' + student.subject); } catch (e) {}
 
       document.getElementById('examStep').classList.add('hidden');
       document.getElementById('resultStep').classList.remove('hidden');
       document.getElementById('scoreDetail').textContent = `${res.totalQuestions} questions submitted for ${student.subject}`;
     } catch (err) {
       showLoading(false);
-      alert('Connection error while submitting: ' + err.message);
+      submitting = false;
+      if (subBtn) subBtn.disabled = false;
+      alert('Connection error while submitting. Check your internet and press Submit again. ' + err.message);
     }
   }
 </script>
